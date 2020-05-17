@@ -49,9 +49,12 @@ def setup_platform(hass, config, add_entities, discovery_info=None):
     currency_name = config.get(CONF_CURRENCY_NAME).strip()
     SCAN_INTERVAL = timedelta(minutes=(int(config.get(CONF_UPDATE_FREQUENCY).strip())))
 
+    entities = []
+
     try:
         data = CryptoinfoData(cryptocurrency_name, currency_name)
-        add_entities(CryptoinfoSensor(data, cryptocurrency_name, currency_name))
+        entities.append(CryptoinfoSensor(data, cryptocurrency_name, currency_name))
+        add_entities(entities)
     except urllib.error.HTTPError as error:
         _LOGGER.error(error.reason)
         return False
