@@ -22,10 +22,8 @@ from .const.const import (
     CONF_UPDATE_FREQUENCY,
     SENSOR_PREFIX,
     ATTR_LAST_UPDATE,
-    API_ENDPOINT
+    API_ENDPOINT,
 )
-
-SCAN_INTERVAL = timedelta(minutes=60)
 
 from homeassistant.components.sensor import PLATFORM_SCHEMA
 import homeassistant.helpers.config_validation as cv
@@ -37,17 +35,17 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
     {
         vol.Required(CONF_CRYPTOCURRENCY_NAME, default="bitcoin"): cv.string,
         vol.Required(CONF_CURRENCY_NAME, default="usd"): cv.string,
-        vol.Required(CONF_UPDATE_FREQUENCY, default=60): cv.string,
+        vol.Required(CONF_UPDATE_FREQUENCY, default=1): cv.string,
     }
 )
 
 
 def setup_platform(hass, config, add_entities, discovery_info=None):
-    _LOGGER.debug("Setup Cryptoinfo sensor")
+    _LOGGER.warning("Setup Cryptoinfo sensor")
 
     cryptocurrency_name = config.get(CONF_CRYPTOCURRENCY_NAME).lower().strip()
     currency_name = config.get(CONF_CURRENCY_NAME).strip()
-    SCAN_INTERVAL = timedelta(minutes=(int(config.get(CONF_UPDATE_FREQUENCY).strip())))
+    # SCAN_INTERVAL = timedelta(hours=(int(config.get(CONF_UPDATE_FREQUENCY))))
 
     entities = []
 
@@ -67,10 +65,16 @@ class CryptoinfoData(object):
         self.cryptocurrency_name = cryptocurrency_name
         self.currency_name = currency_name
 
-    @Throttle(SCAN_INTERVAL)
+    @Throttle(timedelta(minutes=1))
     def update(self):
         _LOGGER.warning("Updating Coingecko data")
-        url = API_ENDPOINT + "simple/price?ids=" + self.cryptocurrency_name + "&vs_currencies=" + self.currency_name
+        url = (
+            API_ENDPOINT
+            + "simple/price?ids="
+            + self.cryptocurrency_name
+            + "&vs_currencies="
+            + self.currency_name
+        )
         # sending get request
         r = requests.get(url=url)
         # extracting response json
@@ -106,11 +110,11 @@ class CryptoinfoSensor(Entity):
     def device_state_attributes(self):
         return {ATTR_LAST_UPDATE: self._last_update}
 
-    @Throttle(SCAN_INTERVAL)
+    @Throttle(timedelta(hours=1))
     def update(self):
         self.data.update()
-        _LOGGER.warning(self.data)
-        price_data = self.data
+        _LOGGER.warning(self.data.data)
+        price_data = self.data.data
 
         try:
             if price_data:
