@@ -54,10 +54,11 @@ def setup_platform(hass, config, add_entities, discovery_info=None):
     try:
         data = CryptoinfoData(cryptocurrency_name, currency_name)
         entities.append(CryptoinfoSensor(data, cryptocurrency_name, currency_name))
-        add_entities(entities)
     except urllib.error.HTTPError as error:
         _LOGGER.error(error.reason)
         return False
+
+    add_entities(entities)
 
 
 class CryptoinfoData(object):
