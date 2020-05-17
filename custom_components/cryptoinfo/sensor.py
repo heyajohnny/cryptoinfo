@@ -109,7 +109,8 @@ class CryptoinfoSensor(Entity):
     @Throttle(SCAN_INTERVAL)
     def update(self):
         self.data.update()
-        price_data = self.data.data
+        _LOGGER.warning(self.data)
+        price_data = self.data
 
         try:
             if price_data:
