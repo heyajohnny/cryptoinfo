@@ -3,10 +3,9 @@
 Sensor component for Cryptoinfo
 Author: Johnny Visser
 
-ToDo: Add properties:
--cryptocurrency_name,      (default = "bitcoin")
--currency_name,             (default = "usd")
--update_frequency           (default = 60) (value represent the number of minutes)
+ToDo:
+- Add documentation and reference to coingecko
+- Add to hacs repo
 https://api.coingecko.com/api/v3/simple/price?ids=neo&vs_currencies=usd
 """
 
@@ -35,7 +34,7 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
     {
         vol.Required(CONF_CRYPTOCURRENCY_NAME, default="bitcoin"): cv.string,
         vol.Required(CONF_CURRENCY_NAME, default="usd"): cv.string,
-        vol.Required(CONF_UPDATE_FREQUENCY, default=1): cv.string,
+        vol.Required(CONF_UPDATE_FREQUENCY, default=60): cv.string,
     }
 )
 
@@ -66,9 +65,9 @@ class CryptoinfoData(object):
         self.data = None
         self.cryptocurrency_name = cryptocurrency_name
         self.currency_name = currency_name
-        self.update = Throttle(update_frequency)(self.update)
+        self.update = Throttle(update_frequency)(self._update)
 
-    def update(self):
+    def _update(self):
         _LOGGER.debug("Updating Coingecko data")
         url = (
             API_ENDPOINT
@@ -91,7 +90,7 @@ class CryptoinfoSensor(Entity):
         self.data = data
         self.cryptocurrency_name = cryptocurrency_name
         self.currency_name = currency_name
-        self.update = Throttle(update_frequency)(self.update)
+        self.update = Throttle(update_frequency)(self._update)
         self._name = SENSOR_PREFIX + "price"
         self._icon = "mdi:currency-usd"
         self._state = None
@@ -113,7 +112,7 @@ class CryptoinfoSensor(Entity):
     def device_state_attributes(self):
         return {ATTR_LAST_UPDATE: self._last_update}
 
-    def update(self):
+    def _update(self):
         self.data.update()
         price_data = self.data.data
 
