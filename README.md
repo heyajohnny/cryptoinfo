@@ -28,3 +28,4 @@ https://api.coingecko.com/api/v3/simple/supported_vs_currencies and copy / paste
 ### Issues and new functionality
 If there are any problems, please create an issue in https://github.com/heyajohnny/cryptoinfo/issues
 If you want new functionality added, please create an issue with a description of the new functionality that you want in: https://github.com/heyajohnny/cryptoinfo/issues
+
