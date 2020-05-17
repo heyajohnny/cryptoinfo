@@ -41,17 +41,19 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
 
 
 def setup_platform(hass, config, add_entities, discovery_info=None):
-    _LOGGER.warning("Setup Cryptoinfo sensor")
+    _LOGGER.debug("Setup Cryptoinfo sensor")
 
     cryptocurrency_name = config.get(CONF_CRYPTOCURRENCY_NAME).lower().strip()
     currency_name = config.get(CONF_CURRENCY_NAME).strip()
-    # SCAN_INTERVAL = timedelta(hours=(int(config.get(CONF_UPDATE_FREQUENCY))))
+    update_frequency = timedelta(minutes=(int(config.get(CONF_UPDATE_FREQUENCY))))
 
     entities = []
 
     try:
-        data = CryptoinfoData(cryptocurrency_name, currency_name)
-        entities.append(CryptoinfoSensor(data, cryptocurrency_name, currency_name))
+        data = CryptoinfoData(cryptocurrency_name, currency_name, update_frequency)
+        entities.append(
+            CryptoinfoSensor(data, cryptocurrency_name, currency_name, update_frequency)
+        )
     except urllib.error.HTTPError as error:
         _LOGGER.error(error.reason)
         return False
@@ -60,14 +62,14 @@ def setup_platform(hass, config, add_entities, discovery_info=None):
 
 
 class CryptoinfoData(object):
-    def __init__(self, cryptocurrency_name, currency_name):
+    def __init__(self, cryptocurrency_name, currency_name, update_frequency):
         self.data = None
         self.cryptocurrency_name = cryptocurrency_name
         self.currency_name = currency_name
+        self.update = Throttle(update_frequency)(self.update)
 
-    @Throttle(timedelta(minutes=1))
     def update(self):
-        _LOGGER.warning("Updating Coingecko data")
+        _LOGGER.debug("Updating Coingecko data")
         url = (
             API_ENDPOINT
             + "simple/price?ids="
@@ -79,16 +81,17 @@ class CryptoinfoData(object):
         r = requests.get(url=url)
         # extracting response json
         value = r.json()[self.cryptocurrency_name][self.currency_name]
-        _LOGGER.warning(value)
+        _LOGGER.debug(value)
 
         self.data = value
 
 
 class CryptoinfoSensor(Entity):
-    def __init__(self, data, cryptocurrency_name, currency_name):
+    def __init__(self, data, cryptocurrency_name, currency_name, update_frequency):
         self.data = data
         self.cryptocurrency_name = cryptocurrency_name
         self.currency_name = currency_name
+        self.update = Throttle(update_frequency)(self.update)
         self._name = SENSOR_PREFIX + "price"
         self._icon = "mdi:currency-usd"
         self._state = None
@@ -110,10 +113,8 @@ class CryptoinfoSensor(Entity):
     def device_state_attributes(self):
         return {ATTR_LAST_UPDATE: self._last_update}
 
-    @Throttle(timedelta(hours=1))
     def update(self):
         self.data.update()
-        _LOGGER.warning(self.data.data)
         price_data = self.data.data
 
         try:
