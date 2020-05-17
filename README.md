@@ -2,6 +2,7 @@
 ### Powered by CoinGecko API
 
 If you like my work, please buy me a coffee. This will keep me awake :)
+
 <a href="https://www.buymeacoffee.com/1v3ckWD" target="_blank"><img src="https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png"></a>
 
 #### Provides Home Assistant sensors all cryptocurrencies supported by CoinGecko
@@ -18,10 +19,10 @@ Example config:
       update_frequency: 15             (default = 60) number of minutes to refresh data of the sensor
 ```
 
-For the complete list of supported names for 'cryptocurrency_name', visit this page:
+For the complete list of supported values for 'cryptocurrency_name', visit this page:
 https://api.coingecko.com/api/v3/coins/list and copy / paste the "id" value to use as 'cryptocurrency_name'
 
-For the complete list of supported names for 'currency_name', visit this page:
+For the complete list of supported values for 'currency_name', visit this page:
 https://api.coingecko.com/api/v3/simple/supported_vs_currencies and copy / paste the value to use as 'currency_name'
 
 ### Issues and new functionality
