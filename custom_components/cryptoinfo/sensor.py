@@ -95,7 +95,7 @@ class CryptoinfoSensor(Entity):
         self._icon = "mdi:bitcoin"
         self._state = None
         self._last_update = None
-        self._unit_of_measurement = "Price"
+        self._unit_of_measurement = ""
 
     @property
     def name(self):
