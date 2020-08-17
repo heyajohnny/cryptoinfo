@@ -18,6 +18,8 @@ Example config:
       cryptocurrency_name: "ethereum"  (default = "bitcoin")
       currency_name: "eur"             (default = "usd")
       update_frequency: 15             (default = 60) number of minutes to refresh data of the sensor
+      include_24h_vol: True             (default = False) Add attribute with 24h Volume
+      include_24h_change: True             (default = False)  Add attribute with 24h change in %
 ```
 
 For the complete list of supported values for 'cryptocurrency_name', visit this page:
