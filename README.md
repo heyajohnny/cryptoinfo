@@ -15,6 +15,7 @@ Example config:
 ```Configuration.yaml:
   sensor:
     - platform: cryptoinfo
+      id: "main wallet"                (optional, default = '') add some extra naming to the sensor
       cryptocurrency_name: "ethereum"  (default = "bitcoin")
       currency_name: "eur"             (default = "usd")
       multiplier: 1                    (default = 1) the currency value multiplied by this number
@@ -26,6 +27,22 @@ https://api.coingecko.com/api/v3/coins/list and copy / paste the "id" value to u
 
 For the complete list of supported values for 'currency_name', visit this page:
 https://api.coingecko.com/api/v3/simple/supported_vs_currencies and copy / paste the value to use as 'currency_name'
+
+### Attributes
+There are 3 important attributes:
+- volume.       This will return the 24 hour volume in 'currency_name'(default = "usd") of the 'cryptocurrency_name'(default = "bitcoin")
+- change.       This will return the 24 hour change in 'currency_name'(default = "usd") of the 'cryptocurrency_name'(default = "bitcoin")
+- market_cap.   This will return the total market cap of the 'cryptocurrency_name'(default = "bitcoin") displayed in 'currency_name'(default = "usd")
+
+Example for usage of attributes.
+This example creates a new sensor with the attribute value 'vokume' of the sensor 'sensor.cryptoinfo_main_wallet_ethereum_eur':
+```yaml
+- platform: template
+    sensors:
+      cryptoinfo_main_wallet_ethereum_eur_24h_volume:
+        value_template: "{{ state_attr('sensor.cryptoinfo_main_wallet_ethereum_eur', 'volume') }}"
+        unit_of_measurement: '\u200b'
+```
 
 ### Issues and new functionality
 If there are any problems, please create an issue in https://github.com/heyajohnny/cryptoinfo/issues

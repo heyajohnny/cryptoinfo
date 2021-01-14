@@ -4,3 +4,4 @@ Version: 0.0.3  20200527 - Changed the name of the sensor to "Cryptoinfo " + [cr
 Version: 0.0.4  20200607 - Changed default 'unit_of_measurement' to "" + changed icon to "mdi:bitcoin"
 Version: 0.0.5  20200616 - Changed default 'unit_of_measurement' to zero width space
 Version: 0.0.6  20201016 - Added multiplier
+Version: 0.0.7  20210114 - Added Volume, Change and MarketCap attributes
