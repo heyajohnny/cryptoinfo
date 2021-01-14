@@ -40,8 +40,8 @@ This example creates a new sensor with the attribute value 'vokume' of the senso
 - platform: template
     sensors:
       cryptoinfo_main_wallet_ethereum_eur_24h_volume:
-        value_template: "{{ state_attr('sensor.cryptoinfo_main_wallet_ethereum_eur', 'volume') }}"
-        unit_of_measurement: '\u200b'
+        value_template: "{{ state_attr('sensor.cryptoinfo_main_wallet_ethereum_eur', 'volume') | round(0) }}"
+        unit_of_measurement: "€"
 ```
 
 ### Issues and new functionality
