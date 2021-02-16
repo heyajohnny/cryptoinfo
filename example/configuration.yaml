@@ -1,0 +1,23 @@
+sensor:
+  - platform: cryptoinfo
+    id: "main wallet"
+    cryptocurrency_name: "ethereum"
+    currency_name: "eur"
+    multiplier: 1.5
+    update_frequency: 1
+
+  - platform: template
+    sensors:
+      cryptoinfo_main_wallet_ethereum_eur_24h_volume:
+        value_template: "{{ state_attr('sensor.cryptoinfo_main_wallet_ethereum_eur', 'volume') | round(0) }}"
+        unit_of_measurement: "€"
+
+  - platform: template
+    sensors:
+      crypto_bitcoin_owned:
+        friendly_name: "Bitcoin Owned"
+        unit_of_measurement: '$'
+        value_template: >-
+          {% if not is_state('sensor.cryptoinfo_bitcoin_usd', 'unknown') %}
+            {{ (states('sensor.cryptoinfo_bitcoin_usd')|float *0.12345) | round(2) }}
+          {%endif %}

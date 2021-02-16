@@ -21,6 +21,7 @@ Example config:
       multiplier: 1                    (default = 1) the currency value multiplied by this number
       update_frequency: 15             (default = 60) number of minutes to refresh data of the sensor
 ```
+Or copy paste the values from this [configuration.yaml](https://github.com/heyajohnny/cryptoinfo/blob/master/example/configuration.yaml)
 
 For the complete list of supported values for 'cryptocurrency_name', visit this page:
 https://api.coingecko.com/api/v3/coins/list and copy / paste the "id" value to use as 'cryptocurrency_name'
