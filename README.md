@@ -45,6 +45,22 @@ This example creates a new sensor with the attribute value 'vokume' of the senso
         unit_of_measurement: "€"
 ```
 
+
+If you want to know the total value of your cryptocurrencies, you could use this template as an example.
+This example combines the total value of 3 sensors into this 1 template sensor:
+```yaml
+  - platform: template
+    sensors:
+      crypto_total:
+        value_template: "{{
+          ( states('sensor.cryptoinfo_main_wallet_ethereum_eur') | float | round(2)) +
+          ( states('sensor.cryptoinfo_bitcoin_eur') | float | round(2)) +
+          ( states('sensor.cryptoinfo_cardano_eur') | float | round(2))
+          }}"
+        unit_of_measurement: '€'
+        friendly_name: Total value of all my cryptocurrencies
+```
+
 ### Issues and new functionality
 If there are any problems, please create an issue in https://github.com/heyajohnny/cryptoinfo/issues
 If you want new functionality added, please create an issue with a description of the new functionality that you want in: https://github.com/heyajohnny/cryptoinfo/issues
