@@ -38,7 +38,7 @@ There are 3 important attributes:
 Example for usage of attributes.
 This example creates a new sensor with the attribute value 'vokume' of the sensor 'sensor.cryptoinfo_main_wallet_ethereum_eur':
 ```yaml
-- platform: template
+  - platform: template
     sensors:
       cryptoinfo_main_wallet_ethereum_eur_24h_volume:
         value_template: "{{ state_attr('sensor.cryptoinfo_main_wallet_ethereum_eur', 'volume') | round(0) }}"
