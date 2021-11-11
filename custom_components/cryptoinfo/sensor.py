@@ -87,6 +87,7 @@ class CryptoinfoSensor(Entity):
         self._change = None
         self._market_cap = None
         self._unit_of_measurement = "\u200b"
+        self._attr_unique_id=cryptocurrency_name + currency_name + multiplier
 
     @property
     def name(self):
