@@ -106,7 +106,7 @@ class CryptoinfoSensor(Entity):
         return self._unit_of_measurement
 
     @property
-    def device_state_attributes(self):
+    def extra_state_attributes(self):
         return {ATTR_LAST_UPDATE: self._last_update, ATTR_VOLUME: self._volume, ATTR_CHANGE: self._change, ATTR_MARKET_CAP: self._market_cap }
 
     def _update(self):
