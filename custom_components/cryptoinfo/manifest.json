@@ -1,11 +1,12 @@
 {
-  "domain": "cryptoinfo",
-  "name": "Cryptoinfo",
-  "version": "0.0.10",
-  "documentation": "https://github.com/heyajohnny/cryptoinfo",
+  "domain": "homegecko",
+  "name": "HomeGecko",
+  "version": "0.1.0",
+  "documentation": "https://github.com/McCookieM/homegecko",
   "dependencies": [],
   "codeowners": [
-    "@heyajohnny"
+    "@heyajohnny",
+    "@McCookieM"
   ],
   "requirements": []
 }
