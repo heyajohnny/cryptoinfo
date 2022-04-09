@@ -126,21 +126,26 @@ class CryptoinfoSensor(Entity):
             ATTR_BASE_PRICE: self._base_price,
             ATTR_CHANGE: self._change,
             ATTR_MARKET_CAP: self._market_cap,
+            ATTR_SYMBOL: self._symbol,
+            ATTR_LOGO_URL: self._logo_url,
+            ATTR_RANK: self._rank,
+            ATTR_HIGH: self._high,
+            ATTR_HIGH_TIMESTAMP: self._high_timestamp,
+            ATTR_FIRST_TRADE: self._first_trade,
         }
 
     def _update(self):
         url = (
             API_ENDPOINT
-            + "simple/price?ids="
+            + "coins/market?ids="
             + self.cryptocurrency_name
-            + "&vs_currencies="
+            + "&vs_currency="
             + self.currency_name
-            + "&include_market_cap=true&include_24hr_vol=true&include_24hr_change=true"
         )
         # sending get request
         r = requests.get(url=url)
         # extracting response json
-        self.data = r.json()[self.cryptocurrency_name][self.currency_name]
+        self.data = r.json()[0]["current_price"]
         # multiply the price
         price_data = self.data * float(self.multiplier)
 
@@ -150,18 +155,10 @@ class CryptoinfoSensor(Entity):
                 self._last_update = datetime.today().strftime("%d-%m-%Y %H:%M")
                 self._state = float(price_data)
                 # set the attributes of the sensor
-                self._volume = r.json()[self.cryptocurrency_name][
-                    self.currency_name + "_24h_vol"
-                ]
-                self._base_price = r.json()[self.cryptocurrency_name][
-                    self.currency_name
-                ]
-                self._change = r.json()[self.cryptocurrency_name][
-                    self.currency_name + "_24h_change"
-                ]
-                self._market_cap = r.json()[self.cryptocurrency_name][
-                    self.currency_name + "_market_cap"
-                ]
+                self._volume = r.json()[0]["total_volume"]
+                self._base_price = r.json()[0]["current_price"]
+                self._change = r.json()[0]["price_change_percentage_24h"]
+                self._market_cap = r.json()[0]["market_cap"]
             else:
                 raise ValueError()
         except ValueError:
