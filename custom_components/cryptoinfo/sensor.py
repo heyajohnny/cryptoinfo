@@ -21,7 +21,6 @@ from .const.const import (
     ATTR_LAST_UPDATE,
     ATTR_VOLUME,
     ATTR_BASE_PRICE,
-    ATTR_CHANGE,
     ATTR_MARKET_CAP,
     ATTR_SYMBOL,
     ATTR_LOGO_URL,
@@ -32,6 +31,10 @@ from .const.const import (
     ATTR_24_HR,
     ATTR_7_DAY,
     ATTR_30_DAY,
+    ATTR_1_HR_PCT,
+    ATTR_24_HR_PCT,
+    ATTR_7_DAY_PCT,
+    ATTR_30_DAY_PCT,
     API_ENDPOINT,
     CONF_ID,
 )
@@ -102,7 +105,6 @@ class CryptoinfoSensor(Entity):
         self._last_update = None
         self._volume = None
         self._base_price = None
-        self._change = None
         self._market_cap = None
         self._symbol = None
         self._logo_url = None
@@ -113,6 +115,10 @@ class CryptoinfoSensor(Entity):
         self._24_hr = None
         self._7_day = None
         self._30_day = None
+        self._1_hr_pct = None
+        self._24_hr_pct = None
+        self._7_day_pct = None
+        self._30_day_pct = None
         self._unit_of_measurement = currency_name.upper()
         self._attr_unique_id = cryptocurrency_name + currency_name + multiplier
 
@@ -138,7 +144,6 @@ class CryptoinfoSensor(Entity):
             ATTR_LAST_UPDATE: self._last_update,
             ATTR_VOLUME: self._volume,
             ATTR_BASE_PRICE: self._base_price,
-            ATTR_CHANGE: self._change,
             ATTR_MARKET_CAP: self._market_cap,
             ATTR_SYMBOL: self._symbol,
             ATTR_LOGO_URL: self._logo_url,
@@ -149,6 +154,10 @@ class CryptoinfoSensor(Entity):
             ATTR_24_HR: self._24_hr,
             ATTR_7_DAY: self._7_day,
             ATTR_30_DAY: self._30_day
+            ATTR_1_HR: self._1_hr_pct,
+            ATTR_24_HR: self._24_hr_pct,
+            ATTR_7_DAY: self._7_day_pct,
+            ATTR_30_DAY: self._30_day_pct,
         }
     def _update(self):
         url = (
@@ -173,7 +182,6 @@ class CryptoinfoSensor(Entity):
                 # set the attributes of the sensor
                 self._volume = r.json()[0]["total_volume"]
                 self._base_price = r.json()[0]["current_price"]
-                self._change = r.json()[0]["price_change_percentage_24h"]
                 self._market_cap = r.json()[0]["market_cap"]
                 self._symbol = r.json()[0]["symbol"]
                 self._logo_url = r.json()[0]["image"]
@@ -181,6 +189,8 @@ class CryptoinfoSensor(Entity):
                 self._high = r.json()[0]["ath"]
                 high_dt = datetime.strptime(r.json()[0]["ath_date"],"%Y-%m-%dT%H:%M:%S.%fZ")
                 self._high_timestamp = high_dt.strftime("%d-%m-%Y %H:%M")
+                self._24_hr = r.json()[0]["price_change_24h"]
+                self._24_hr_pct = r.json()[0]["price_change_percentage_24h"]
 
                  # Remove any query info from end of URL
                 self._logo_url = urljoin(self._logo_url, urlparse(self._logo_url).path)
@@ -203,3 +213,7 @@ class CryptoinfoSensor(Entity):
             self._24_hr = None
             self._7_day = None
             self._30_day = None
+            self._1_hr_pct = None
+            self._24_hr_pct = None
+            self._7_day_pct = None
+            self._30_day_pct = None
