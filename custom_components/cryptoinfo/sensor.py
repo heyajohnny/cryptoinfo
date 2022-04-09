@@ -153,7 +153,7 @@ class CryptoinfoSensor(Entity):
             ATTR_1_HR: self._1_hr,
             ATTR_24_HR: self._24_hr,
             ATTR_7_DAY: self._7_day,
-            ATTR_30_DAY: self._30_day
+            ATTR_30_DAY: self._30_day,
             ATTR_1_HR: self._1_hr_pct,
             ATTR_24_HR: self._24_hr_pct,
             ATTR_7_DAY: self._7_day_pct,
