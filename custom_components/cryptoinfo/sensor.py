@@ -168,7 +168,8 @@ class CryptoinfoSensor(Entity):
                 self._logo_url = r.json()[0]["image"]
                 self._rank = r.json()[0]["market_cap_rank"]
                 self._high = r.json()[0]["ath"]
-                self._high_timestamp = r.json()[0]["ath_date"][0:19].strptime("%Y-%m-%dT%H:%M:%S").strftime("%d-%m-%Y %H:%M")
+                high_dt = r.json()[0]["ath_date"][0:19].strptime("%Y-%m-%dT%H:%M:%S")
+                self._high_timestamp = high_dt.strftime("%d-%m-%Y %H:%M")
 
                  # Remove any query info from end of URL
                 urljoin(self._logo_url, urlparse(self._logo_url).path)
@@ -185,4 +186,4 @@ class CryptoinfoSensor(Entity):
             self._logo_url = None
             self._rank = None
             self._high = None
-            self._high_timestamp = None
+            self._high_timestamp = datetime.datetime(1970,1,1).strftime("%d-%m-%Y %H:%M")
