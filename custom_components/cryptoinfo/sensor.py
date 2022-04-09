@@ -201,7 +201,6 @@ class CryptoinfoSensor(Entity):
             self._last_update = datetime.today().strftime("%d-%m-%Y %H:%M")
             self._volume = None
             self._base_price = None
-            self._change = None
             self._market_cap = None
             self._symbol = None
             self._logo_url = None
