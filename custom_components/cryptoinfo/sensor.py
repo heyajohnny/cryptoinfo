@@ -172,7 +172,7 @@ class CryptoinfoSensor(Entity):
                 self._high_timestamp = high_dt.strftime("%d-%m-%Y %H:%M")
 
                  # Remove any query info from end of URL
-                urljoin(self._logo_url, urlparse(self._logo_url).path)
+                self._logo_url = urljoin(self._logo_url, urlparse(self._logo_url).path)
             else:
                 raise ValueError()
         except ValueError:
