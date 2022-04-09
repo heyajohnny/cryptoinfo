@@ -8,6 +8,7 @@ import requests
 import voluptuous as vol
 from datetime import datetime, date, timedelta
 import urllib.error
+from urllib.parse import urljoin, urlparse
 
 from .const.const import (
     _LOGGER,
@@ -166,7 +167,10 @@ class CryptoinfoSensor(Entity):
                 self._logo_url = r.json()[0]["image"]
                 self._rank = r.json()[0]["market_cap_rank"]
                 self._high = r.json()[0]["ath"]
-                self._high_timestamp = r.json()[0]["ath_date"]
+                self._high_timestamp = r.json()[0]["ath_date"].strftime("%d-%m-%Y %H:%M")
+
+                 # Remove any query info from end of URL
+                urljoin(self._logo_url, urlparse(self._logo_url).path)
             else:
                 raise ValueError()
         except ValueError:
