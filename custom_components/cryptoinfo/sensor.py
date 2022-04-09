@@ -26,7 +26,6 @@ from .const.const import (
     ATTR_RANK,
     ATTR_HIGH,
     ATTR_HIGH_TIMESTAMP,
-    ATTR_FIRST_TRADE,
     API_ENDPOINT,
     CONF_ID,
 )
@@ -104,7 +103,6 @@ class CryptoinfoSensor(Entity):
         self._rank = None
         self._high = None
         self._high_timestamp = None
-        self._first_trade = None
         self._unit_of_measurement = "\u200b"
         self._attr_unique_id = cryptocurrency_name + currency_name + multiplier
 
@@ -137,7 +135,6 @@ class CryptoinfoSensor(Entity):
             ATTR_RANK: self._rank,
             ATTR_HIGH: self._high,
             ATTR_HIGH_TIMESTAMP: self._high_timestamp,
-            ATTR_FIRST_TRADE: self._first_trade,
         }
 
     def _update(self):
@@ -165,13 +162,11 @@ class CryptoinfoSensor(Entity):
                 self._base_price = r.json()[0]["current_price"]
                 self._change = r.json()[0]["price_change_percentage_24h"]
                 self._market_cap = r.json()[0]["market_cap"]
-                self._symbol = None
-                self._logo_url = None
-                self._rank = None
-                self._high = None
-                self._high_timestamp = None
-                self._first_trade = None
-
+                self._symbol = r.json()[0]["symbol"]
+                self._logo_url = r.json()[0]["image"]
+                self._rank = r.json()[0]["market_cap_rank"]
+                self._high = r.json()[0]["ath"]
+                self._high_timestamp = r.json()[0]["ath_date"]
             else:
                 raise ValueError()
         except ValueError:
@@ -186,4 +181,3 @@ class CryptoinfoSensor(Entity):
             self._rank = None
             self._high = None
             self._high_timestamp = None
-            self._first_trade = None
