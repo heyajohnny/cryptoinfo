@@ -105,7 +105,7 @@ class CryptoinfoSensor(Entity):
         self._rank = None
         self._high = None
         self._high_timestamp = None
-        self._unit_of_measurement = "\u200b"
+        self._unit_of_measurement = currency_name.upper()
         self._attr_unique_id = cryptocurrency_name + currency_name + multiplier
 
     @property
