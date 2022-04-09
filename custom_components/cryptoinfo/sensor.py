@@ -21,6 +21,12 @@ from .const.const import (
     ATTR_BASE_PRICE,
     ATTR_CHANGE,
     ATTR_MARKET_CAP,
+    ATTR_SYMBOL,
+    ATTR_LOGO_URL,
+    ATTR_RANK,
+    ATTR_HIGH,
+    ATTR_HIGH_TIMESTAMP,
+    ATTR_FIRST_TRADE,
     API_ENDPOINT,
     CONF_ID,
 )
