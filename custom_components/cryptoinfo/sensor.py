@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """
-Sensor component for Cryptoinfo
-Author: Johnny Visser
+Sensor component for Homegecko
+Forked from Cryptoinfo by Johnny Visser
+Author: McCookieM
 """
 
 import requests
@@ -166,7 +167,7 @@ class CryptoinfoSensor(Entity):
                 self._symbol = r.json()[0]["symbol"]
                 self._logo_url = r.json()[0]["image"]
                 self._rank = r.json()[0]["market_cap_rank"]
-                self._high = r.json()[0]["ath"] 2022-04-09T07:43:42.180Z
+                self._high = r.json()[0]["ath"]
                 self._high_timestamp = r.json()[0]["ath_date"].strptime("%Y-%m-%dT%H:%M:%S.%fZ").strftime("%d-%m-%Y %H:%M")
 
                  # Remove any query info from end of URL
