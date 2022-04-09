@@ -6,7 +6,7 @@ CONF_CURRENCY_NAME = "currency_name"
 CONF_MULTIPLIER = "multiplier"
 CONF_UPDATE_FREQUENCY = "update_frequency"
 
-SENSOR_PREFIX = "homegecko "
+SENSOR_PREFIX = "HomeGecko "
 ATTR_LAST_UPDATE = "last_update"
 ATTR_VOLUME = "volume"
 ATTR_BASE_PRICE = "baseprice"
