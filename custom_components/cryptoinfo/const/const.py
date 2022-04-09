@@ -17,6 +17,10 @@ ATTR_LOGO_URL = "logo_url"
 ATTR_RANK = "rank"
 ATTR_HIGH = "high"
 ATTR_HIGH_TIMESTAMP = "high_timestamp"
+ATTR_1_HR = "1_hr"
+ATTR_24_HR = "24_hr"
+ATTR_7_DAY = "7_day"
+ATTR_30_DAY = "30_day"
 
 API_ENDPOINT = "https://api.coingecko.com/api/v3/"
 
