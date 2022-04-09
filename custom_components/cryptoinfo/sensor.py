@@ -157,7 +157,7 @@ class CryptoinfoSensor(Entity):
             ATTR_1_HR: self._1_hr_pct,
             ATTR_24_HR: self._24_hr_pct,
             ATTR_7_DAY: self._7_day_pct,
-            ATTR_30_DAY: self._30_day_pct,
+            ATTR_30_DAY: self._30_day_pct
         }
     def _update(self):
         url = (
