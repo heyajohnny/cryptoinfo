@@ -99,6 +99,12 @@ class CryptoinfoSensor(Entity):
         self._base_price = None
         self._change = None
         self._market_cap = None
+        self._symbol = None
+        self._logo_url = None
+        self._rank = None
+        self._high = None
+        self._high_timestamp = None
+        self._first_trade = None
         self._unit_of_measurement = "\u200b"
         self._attr_unique_id = cryptocurrency_name + currency_name + multiplier
 
@@ -137,7 +143,7 @@ class CryptoinfoSensor(Entity):
     def _update(self):
         url = (
             API_ENDPOINT
-            + "coins/market?ids="
+            + "coins/markets?ids="
             + self.cryptocurrency_name
             + "&vs_currency="
             + self.currency_name
@@ -159,6 +165,13 @@ class CryptoinfoSensor(Entity):
                 self._base_price = r.json()[0]["current_price"]
                 self._change = r.json()[0]["price_change_percentage_24h"]
                 self._market_cap = r.json()[0]["market_cap"]
+                self._symbol = None
+                self._logo_url = None
+                self._rank = None
+                self._high = None
+                self._high_timestamp = None
+                self._first_trade = None
+
             else:
                 raise ValueError()
         except ValueError:
@@ -168,3 +181,9 @@ class CryptoinfoSensor(Entity):
             self._base_price = None
             self._change = None
             self._market_cap = None
+            self._symbol = None
+            self._logo_url = None
+            self._rank = None
+            self._high = None
+            self._high_timestamp = None
+            self._first_trade = None
