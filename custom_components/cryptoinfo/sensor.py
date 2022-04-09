@@ -28,6 +28,10 @@ from .const.const import (
     ATTR_RANK,
     ATTR_HIGH,
     ATTR_HIGH_TIMESTAMP,
+    ATTR_1_HR,
+    ATTR_24_HR,
+    ATTR_7_DAY,
+    ATTR_30_DAY,
     API_ENDPOINT,
     CONF_ID,
 )
@@ -105,6 +109,10 @@ class CryptoinfoSensor(Entity):
         self._rank = None
         self._high = None
         self._high_timestamp = None
+        self._1_hr = None
+        self._24_hr = None
+        self._7_day = None
+        self._30_day = None
         self._unit_of_measurement = currency_name.upper()
         self._attr_unique_id = cryptocurrency_name + currency_name + multiplier
 
@@ -137,8 +145,11 @@ class CryptoinfoSensor(Entity):
             ATTR_RANK: self._rank,
             ATTR_HIGH: self._high,
             ATTR_HIGH_TIMESTAMP: self._high_timestamp,
+            ATTR_1_HR: self._1_hr,
+            ATTR_24_HR: self._24_hr,
+            ATTR_7_DAY: self._7_day,
+            ATTR_30_DAY: self._30_day
         }
-
     def _update(self):
         url = (
             API_ENDPOINT
@@ -188,3 +199,7 @@ class CryptoinfoSensor(Entity):
             self._high = None
             self._high_timestamp = None
             self._high_timestamp = datetime(1970,1,1).strftime("%d-%m-%Y %H:%M")
+            self._1_hr = None
+            self._24_hr = None
+            self._7_day = None
+            self._30_day = None
