@@ -1,9 +1,10 @@
 import logging
 
+DOMAIN = "homegecko"
+
 CONF_ID = "id"
-CONF_CRYPTOCURRENCY_NAME = "cryptocurrency_name"
+CONF_CRYPTOCURRENCIES = "cryptocurrencies"
 CONF_CURRENCY_NAME = "currency_name"
-CONF_MULTIPLIER = "multiplier"
 CONF_UPDATE_FREQUENCY = "update_frequency"
 
 SENSOR_PREFIX = "HomeGecko "
