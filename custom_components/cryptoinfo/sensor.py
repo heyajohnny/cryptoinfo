@@ -46,10 +46,9 @@ from homeassistant.helpers.entity import Entity
 
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
     {
-        vol.Required(CONF_CRYPTOCURRENCY_NAME, default="bitcoin"): cv.string,
-        vol.Required(CONF_CURRENCY_NAME, default="usd"): cv.string,
-        vol.Required(CONF_MULTIPLIER, default=1): cv.string,
-        vol.Required(CONF_UPDATE_FREQUENCY, default=60): cv.string,
+        vol.Required(CONF_CRYPTOCURRENCIES): cv.ensure_list,
+        vol.Optional(CONF_CURRENCY_NAME, default="usd"): cv.string,
+        vol.Optional(CONF_UPDATE_FREQUENCY, default=60): cv.string,
         vol.Optional(CONF_ID, default=""): cv.string,
     }
 )
@@ -59,23 +58,22 @@ def setup_platform(hass, config, add_entities, discovery_info=None):
     _LOGGER.debug("Setup Cryptoinfo sensor")
 
     id_name = config.get(CONF_ID)
-    cryptocurrency_name = config.get(CONF_CRYPTOCURRENCY_NAME).lower().strip()
+    cryptocurrencies = config.get(CONF_CRYPTOCURRENCIES)
     currency_name = config.get(CONF_CURRENCY_NAME).strip()
-    multiplier = config.get(CONF_MULTIPLIER).strip()
     update_frequency = timedelta(minutes=(int(config.get(CONF_UPDATE_FREQUENCY))))
 
     entities = []
 
     try:
-        entities.append(
-            CryptoinfoSensor(
-                cryptocurrency_name,
-                currency_name,
-                multiplier,
-                update_frequency,
-                id_name,
+        for crypto in cryptocurrencies:
+            entities.append(
+                CryptoinfoSensor(
+                    crypto,
+                    currency_name,
+                    update_frequency,
+                    id_name,
+                )
             )
-        )
     except urllib.error.HTTPError as error:
         _LOGGER.error(error.reason)
         return False
@@ -85,12 +83,11 @@ def setup_platform(hass, config, add_entities, discovery_info=None):
 
 class CryptoinfoSensor(Entity):
     def __init__(
-        self, cryptocurrency_name, currency_name, multiplier, update_frequency, id_name
+        self, cryptocurrency_name, currency_name, update_frequency, id_name
     ):
         self.data = None
         self.cryptocurrency_name = cryptocurrency_name
         self.currency_name = currency_name
-        self.multiplier = multiplier
         self.update = Throttle(update_frequency)(self._update)
         self._attr_device_class = SensorDeviceClass.MONETARY
         self._name = (
@@ -171,14 +168,12 @@ class CryptoinfoSensor(Entity):
         r = requests.get(url=url)
         # extracting response json
         self.data = r.json()[0]["current_price"]
-        # multiply the price
-        price_data = self.data * float(self.multiplier)
 
         try:
-            if price_data:
+            if self.data:
                 # Set the values of the sensor
                 self._last_update = datetime.today().strftime("%d-%m-%Y %H:%M")
-                self._state = float(price_data)
+                self._state = float(self.data)
                 # set the attributes of the sensor
                 self._volume = r.json()[0]["total_volume"]
                 self._base_price = r.json()[0]["current_price"]
