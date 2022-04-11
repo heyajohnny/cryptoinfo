@@ -2,7 +2,6 @@
   "domain": "homegecko",
   "name": "HomeGecko",
   "version": "0.1.0",
-  "config_flow": "true",
   "documentation": "https://github.com/McCookieM/homegecko",
   "dependencies": [],
   "codeowners": [
