@@ -11,7 +11,7 @@ from datetime import datetime, date, timedelta
 import urllib.error
 from urllib.parse import urljoin, urlparse
 
-from .const.const import (
+from .const import (
     _LOGGER,
     CONF_CRYPTOCURRENCY_NAME,
     CONF_CURRENCY_NAME,
