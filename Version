@@ -8,3 +8,4 @@ Version: 0.0.7  20210114 - Added Volume, Change and MarketCap attributes
 Version: 0.0.8  20210308 - Added Version in manifest
 Version: 0.0.9  20211215 - New version with extra_state_attributes
 Version: 0.0.10 20220126 - Added device class attribute 'monetary'
+Version: 0.1.0 20220821 - Added 1h, 24h, 7d, 30d volume + circulating and total supply attributes
