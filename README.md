@@ -30,18 +30,24 @@ For the complete list of supported values for 'currency_name', visit this page:
 https://api.coingecko.com/api/v3/simple/supported_vs_currencies and copy / paste the value to use as 'currency_name'
 
 ### Attributes
-There are 3 important attributes:
-- volume.       This will return the 24 hour volume in 'currency_name'(default = "usd") of the 'cryptocurrency_name'(default = "bitcoin")
-- change.       This will return the 24 hour change in 'currency_name'(default = "usd") of the 'cryptocurrency_name'(default = "bitcoin")
-- market_cap.   This will return the total market cap of the 'cryptocurrency_name'(default = "bitcoin") displayed in 'currency_name'(default = "usd")
+There are 9 important attributes:
+- base_price          This will return the price of 1 coin / token in 'currency_name'(default = "usd") of the 'cryptocurrency_name'(default = "bitcoin")
+- 24h_volume          This will return the 24 hour volume in 'currency_name'(default = "usd") of the 'cryptocurrency_name'(default = "bitcoin")
+- 1h_change           This will return the 1 hour change in percentage of the 'cryptocurrency_name'(default = "bitcoin")
+- 24h_change          This will return the 24 hour change in percentage of the 'cryptocurrency_name'(default = "bitcoin")
+- 7d_change           This will return the 7 day change in percentage of the 'cryptocurrency_name'(default = "bitcoin")
+- 30d_change          This will return the 30 day change in percentage of the 'cryptocurrency_name'(default = "bitcoin")
+- market_cap          This will return the total market cap of the 'cryptocurrency_name'(default = "bitcoin") displayed in 'currency_name'(default = "usd")
+- circulating_supply  This will return the circulating supply of the 'cryptocurrency_name'(default = "bitcoin")
+- total_supply        This will return the total supply of the 'cryptocurrency_name'(default = "bitcoin")
 
 Example for usage of attributes.
-This example creates a new sensor with the attribute value 'vokume' of the sensor 'sensor.cryptoinfo_main_wallet_ethereum_eur':
+This example creates a new sensor with the attribute value 'volume' of the sensor 'sensor.cryptoinfo_main_wallet_ethereum_eur':
 ```yaml
   - platform: template
     sensors:
       cryptoinfo_main_wallet_ethereum_eur_24h_volume:
-        value_template: "{{ state_attr('sensor.cryptoinfo_main_wallet_ethereum_eur', 'volume') | round(0) }}"
+        value_template: "{{ state_attr('sensor.cryptoinfo_main_wallet_ethereum_eur', 'volume') | float(0) | round(0) }}"
         unit_of_measurement: "€"
 ```
 
@@ -53,9 +59,9 @@ This example combines the total value of 3 sensors into this 1 template sensor:
     sensors:
       crypto_total:
         value_template: "{{
-          ( states('sensor.cryptoinfo_main_wallet_ethereum_eur') | float | round(2)) +
-          ( states('sensor.cryptoinfo_bitcoin_eur') | float | round(2)) +
-          ( states('sensor.cryptoinfo_cardano_eur') | float | round(2))
+          ( states('sensor.cryptoinfo_main_wallet_ethereum_eur') | float(0) | round(2)) +
+          ( states('sensor.cryptoinfo_bitcoin_eur') | float(0) | round(2)) +
+          ( states('sensor.cryptoinfo_cardano_eur') | float(0) | round(2))
           }}"
         unit_of_measurement: '€'
         friendly_name: Total value of all my cryptocurrencies
@@ -64,4 +70,3 @@ This example combines the total value of 3 sensors into this 1 template sensor:
 ### Issues and new functionality
 If there are any problems, please create an issue in https://github.com/heyajohnny/cryptoinfo/issues
 If you want new functionality added, please create an issue with a description of the new functionality that you want in: https://github.com/heyajohnny/cryptoinfo/issues
-
