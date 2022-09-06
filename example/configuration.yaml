@@ -3,6 +3,7 @@ sensor:
     id: "main wallet"
     cryptocurrency_name: "ethereum"
     currency_name: "eur"
+    unit_of_measurement: "€"
     multiplier: 1.5
     update_frequency: 1
 

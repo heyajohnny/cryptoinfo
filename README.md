@@ -18,6 +18,7 @@ Example config:
       id: "main wallet"                (optional, default = '') add some extra naming to the sensor
       cryptocurrency_name: "ethereum"  (default = "bitcoin")
       currency_name: "eur"             (default = "usd")
+      unit_of_measurement: "\u200b"    (default = "$")
       multiplier: 1                    (default = 1) the currency value multiplied by this number
       update_frequency: 15             (default = 60) number of minutes to refresh data of the sensor
 ```
