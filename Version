@@ -10,3 +10,4 @@ Version: 0.0.9  20211215 - New version with extra_state_attributes
 Version: 0.0.10 20220126 - Added device class attribute 'monetary'
 Version: 0.1.0 20220821 - Added 1h, 24h, 7d, 30d volume + circulating and total supply attributes
 Version: 0.1.1 20220903 - Removed unit of measurement, because it isn't needed anymore in the current HA versions
+Version: 0.1.2 20220906 - Added state_class instead of the unit_of_measurement
