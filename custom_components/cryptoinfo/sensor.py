@@ -65,7 +65,7 @@ def setup_platform(hass, config, add_entities, discovery_info=None):
             CryptoinfoSensor(
                 cryptocurrency_name,
                 currency_name,
-                unit_of_measurement,Ö
+                unit_of_measurement,
                 multiplier,
                 update_frequency,
                 id_name,

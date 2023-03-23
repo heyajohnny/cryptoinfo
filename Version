@@ -14,3 +14,4 @@ Version: 0.1.2 20220906 - Added state_class instead of the unit_of_measurement
 Version: 0.1.3 20220906 - Readded the unit_of_measurement with the value of ""
 Version: 0.1.4 20220906 - Made the unit_of_measurement configurable with a default value of "$"
 Version: 0.1.5 20230323 - Use floating point precision for the update interval
+Version: 0.1.6 20230323 - Use floating point precision for the update interval (typo fix)
