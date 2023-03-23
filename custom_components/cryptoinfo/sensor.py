@@ -56,7 +56,7 @@ def setup_platform(hass, config, add_entities, discovery_info=None):
     currency_name = config.get(CONF_CURRENCY_NAME).strip()
     unit_of_measurement = config.get(CONF_UNIT_OF_MEASUREMENT).strip()
     multiplier = config.get(CONF_MULTIPLIER).strip()
-    update_frequency = timedelta(minutes=(int(config.get(CONF_UPDATE_FREQUENCY))))
+    update_frequency = timedelta(minutes=(float(config.get(CONF_UPDATE_FREQUENCY))))
 
     entities = []
 
@@ -65,7 +65,7 @@ def setup_platform(hass, config, add_entities, discovery_info=None):
             CryptoinfoSensor(
                 cryptocurrency_name,
                 currency_name,
-                unit_of_measurement,
+                unit_of_measurement,Ö
                 multiplier,
                 update_frequency,
                 id_name,
