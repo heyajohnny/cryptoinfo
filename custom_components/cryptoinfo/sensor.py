@@ -161,12 +161,24 @@ class CryptoinfoSensor(Entity):
             + self.currency_name
             + "&page=1&sparkline=false&price_change_percentage=1h%2C24h%2C7d%2C30d"
         )
-        # sending get request
-        r = requests.get(url=url)
-        # extracting response json
-        self.data = r.json()[0]
-        # multiply the price
-        price_data = self.data["current_price"] * float(self.multiplier)
+        r = None
+        try:
+            # sending get request
+            r = requests.get(url=url)
+            # extracting response json
+            self.data = r.json()[0]
+            # multiply the price
+            price_data = self.data["current_price"] * float(self.multiplier)
+        except Exception as error:
+            _LOGGER.error(
+                "Error fetching update from coingecko: "
+                + str(error)
+                + " - response status: "
+                + str(r.status_code if r is not None else None)
+                + " - "
+                + str(r.reason if r is not None else None)
+            )
+            price_data = None
 
         try:
             if price_data:
