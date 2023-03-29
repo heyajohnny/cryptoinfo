@@ -4,7 +4,7 @@
 
 #### Provides Home Assistant sensors for all cryptocurrencies supported by CoinGecko
 
-If you like my work, please buy me a coffee or donate some crypto currencies. This will keep me awake :)
+If you like my work, please buy me a coffee or donate some crypto currencies. This will keep me awake, asleep, or whatever :wink:
 
 <a href="https://www.buymeacoffee.com/1v3ckWD" target="_blank"><img src="https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png"></a><details>
   <summary>Crypto currency addresses</summary>
@@ -14,8 +14,15 @@ If you like my work, please buy me a coffee or donate some crypto currencies. Th
 <img width="164px" alt="iota" src="https://user-images.githubusercontent.com/20553716/210132585-9addbc8f-c293-4f63-b2fb-5f4b59af67fd.png">
 </details>
 
-### Install:
-- Copy the files in the /custom_components/cryptoinfo/ folder to: [homeassistant]/config/custom_components/cryptoinfo/
+### Installation step 1:
+There are 2 ways to install cryptoinfo:
+1. Download 'cryptoinfo' from the HACS store
+2. Copy the files in the /custom_components/cryptoinfo/ folder to: [homeassistant]/config/custom_components/cryptoinfo/
+
+### Installation step 2:
+The next step is to add cryptoinfo to your configuration.yaml. You can do that in 2 ways:
+1. Copy and paste the values from this [configuration.yaml](https://github.com/heyajohnny/cryptoinfo/blob/master/example/configuration.yaml) and adjust it according to your needs
+2. Copy and paste the values (and adjust according to your needs) from the configutation you see next
 
 Example config:
 ```Configuration.yaml:
@@ -28,7 +35,6 @@ Example config:
       multiplier: 1                    (default = 1) the currency value multiplied by this number
       update_frequency: 15             (default = 60) number of minutes to refresh data of the sensor
 ```
-Or copy paste the values from this [configuration.yaml](https://github.com/heyajohnny/cryptoinfo/blob/master/example/configuration.yaml)
 
 For the complete list of supported values for 'cryptocurrency_name', visit this page:
 https://api.coingecko.com/api/v3/coins/list and copy / paste the "id" value to use as 'cryptocurrency_name'
