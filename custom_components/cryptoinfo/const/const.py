@@ -6,6 +6,7 @@ CONF_CURRENCY_NAME = "currency_name"
 CONF_MULTIPLIER = "multiplier"
 CONF_UPDATE_FREQUENCY = "update_frequency"
 CONF_UNIT_OF_MEASUREMENT = "unit_of_measurement"
+CONF_USE_SIMPLE_PRICE = "use_simple_price"
 
 SENSOR_PREFIX = "Cryptoinfo "
 ATTR_LAST_UPDATE = "last_update"

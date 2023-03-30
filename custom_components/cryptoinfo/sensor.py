@@ -16,6 +16,7 @@ from .const.const import (
     CONF_MULTIPLIER,
     CONF_UNIT_OF_MEASUREMENT,
     CONF_UPDATE_FREQUENCY,
+    CONF_USE_SIMPLE_PRICE,
     SENSOR_PREFIX,
     ATTR_LAST_UPDATE,
     ATTR_24H_VOLUME,
@@ -44,6 +45,7 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
         vol.Required(CONF_MULTIPLIER, default=1): cv.string,
         vol.Required(CONF_UPDATE_FREQUENCY, default=60): cv.string,
         vol.Optional(CONF_ID, default=""): cv.string,
+        vol.Optional(CONF_USE_SIMPLE_PRICE, default=False): cv.boolean,
     }
 )
 
@@ -57,6 +59,7 @@ def setup_platform(hass, config, add_entities, discovery_info=None):
     unit_of_measurement = config.get(CONF_UNIT_OF_MEASUREMENT).strip()
     multiplier = config.get(CONF_MULTIPLIER).strip()
     update_frequency = timedelta(minutes=(float(config.get(CONF_UPDATE_FREQUENCY))))
+    use_simple_price = bool(config.get(CONF_USE_SIMPLE_PRICE))
 
     entities = []
 
@@ -69,6 +72,7 @@ def setup_platform(hass, config, add_entities, discovery_info=None):
                 multiplier,
                 update_frequency,
                 id_name,
+                use_simple_price,
             )
         )
     except urllib.error.HTTPError as error:
@@ -87,6 +91,7 @@ class CryptoinfoSensor(Entity):
         multiplier,
         update_frequency,
         id_name,
+        use_simple_price,
     ):
         self.data = None
         self.cryptocurrency_name = cryptocurrency_name
@@ -102,6 +107,7 @@ class CryptoinfoSensor(Entity):
             + " "
             + currency_name
         )
+        self._use_simple_price = use_simple_price
         self._icon = "mdi:bitcoin"
         self._state = None
         self._last_update = None
@@ -152,7 +158,9 @@ class CryptoinfoSensor(Entity):
             ATTR_TOTAL_SUPPLY: self._total_supply,
         }
 
-    def _update(self):
+    def _fetch_price_data_main(self):
+        if self._use_simple_price:
+            raise ValueError()
         url = (
             API_ENDPOINT
             + "coins/markets?ids="
@@ -180,36 +188,87 @@ class CryptoinfoSensor(Entity):
             )
             price_data = None
 
-        try:
-            if price_data:
-                # Set the values of the sensor
-                self._last_update = datetime.today().strftime("%d-%m-%Y %H:%M")
-                self._state = float(price_data)
-                # set the attributes of the sensor
-                self._base_price = r.json()[0]["current_price"]
-                self._24h_volume = r.json()[0]["total_volume"]
-                self._1h_change = r.json()[0]["price_change_percentage_1h_in_currency"]
-                self._24h_change = r.json()[0][
-                    "price_change_percentage_24h_in_currency"
-                ]
-                self._7d_change = r.json()[0]["price_change_percentage_7d_in_currency"]
-                self._30d_change = r.json()[0][
-                    "price_change_percentage_30d_in_currency"
-                ]
-                self._market_cap = r.json()[0]["market_cap"]
-                self._circulating_supply = r.json()[0]["circulating_supply"]
-                self._total_supply = r.json()[0]["total_supply"]
-            else:
-                raise ValueError()
-        except ValueError:
-            self._state = None
+        if price_data:
+            # Set the values of the sensor
             self._last_update = datetime.today().strftime("%d-%m-%Y %H:%M")
-            self._base_price = None
-            self._24h_volume = None
+            self._state = float(price_data)
+            # set the attributes of the sensor
+            self._base_price = r.json()[0]["current_price"]
+            self._24h_volume = r.json()[0]["total_volume"]
+            self._1h_change = r.json()[0]["price_change_percentage_1h_in_currency"]
+            self._24h_change = r.json()[0][
+                "price_change_percentage_24h_in_currency"
+            ]
+            self._7d_change = r.json()[0]["price_change_percentage_7d_in_currency"]
+            self._30d_change = r.json()[0][
+                "price_change_percentage_30d_in_currency"
+            ]
+            self._market_cap = r.json()[0]["market_cap"]
+            self._circulating_supply = r.json()[0]["circulating_supply"]
+            self._total_supply = r.json()[0]["total_supply"]
+        else:
+            raise ValueError()
+
+    def _fetch_price_data_alternate(self):
+        url = (
+            API_ENDPOINT
+            + "simple/price?ids="
+            + self.cryptocurrency_name
+            + "&vs_currencies="
+            + self.currency_name
+            + "&include_market_cap=true&include_24hr_vol=true&include_24hr_change=true&include_last_updated_at=true"
+        )
+        r = None
+        try:
+            # sending get request
+            r = requests.get(url=url)
+            # extracting response json
+            self.data = r.json()[self.cryptocurrency_name]
+            # multiply the price
+            price_data = self.data[self.currency_name] * float(self.multiplier)
+        except Exception as error:
+            _LOGGER.error(
+                "Error fetching update from coingecko: "
+                + str(error)
+                + " - response status: "
+                + str(r.status_code if r is not None else None)
+                + " - "
+                + str(r.reason if r is not None else None)
+            )
+            price_data = None
+
+        if price_data:
+            # Set the values of the sensor
+            self._last_update = datetime.today().strftime("%d-%m-%Y %H:%M")
+            self._state = float(price_data)
+            # set the attributes of the sensor
+            self._base_price = r.json()[self.cryptocurrency_name][self.currency_name]
+            self._24h_volume = r.json()[self.cryptocurrency_name][self.currency_name+ "_24h_vol"]
             self._1h_change = None
-            self._24h_change = None
+            self._24h_change = r.json()[self.cryptocurrency_name][self.currency_name+ "_24h_change"]
             self._7d_change = None
             self._30d_change = None
-            self._market_cap = None
+            self._market_cap = r.json()[self.cryptocurrency_name][self.currency_name+ "_market_cap"]
             self._circulating_supply = None
             self._total_supply = None
+        else:
+            raise ValueError()
+
+    def _update(self):
+        try:
+            self._fetch_price_data_main()
+        except ValueError:
+            try:
+                self._fetch_price_data_alternate()
+            except ValueError:
+                self._state = None
+                self._last_update = datetime.today().strftime("%d-%m-%Y %H:%M")
+                self._base_price = None
+                self._24h_volume = None
+                self._1h_change = None
+                self._24h_change = None
+                self._7d_change = None
+                self._30d_change = None
+                self._market_cap = None
+                self._circulating_supply = None
+                self._total_supply = None
