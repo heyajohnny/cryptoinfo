@@ -14,6 +14,8 @@ If you like my work, please buy me a coffee or donate some crypto currencies. Th
 <img width="164px" alt="iota" src="https://user-images.githubusercontent.com/20553716/210132585-9addbc8f-c293-4f63-b2fb-5f4b59af67fd.png">
 </details>
 
+If you need more advanced features than this project offers, see [Cryptoinfo Advanced](https://github.com/TheHolyRoger/hass-cryptoinfo)
+
 ### Installation step 1:
 There are 2 ways to install cryptoinfo:
 1. Download 'cryptoinfo' from the HACS store
