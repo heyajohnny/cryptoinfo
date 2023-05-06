@@ -57,12 +57,12 @@ There are 9 important attributes:
 - total_supply        This will return the total supply of the 'cryptocurrency_name'(default = "bitcoin")
 
 Example for usage of attributes.
-This example creates a new sensor with the attribute value 'volume' of the sensor 'sensor.cryptoinfo_main_wallet_ethereum_eur':
+This example creates a new sensor with the attribute value '24h_volume' of the sensor 'sensor.cryptoinfo_main_wallet_ethereum_eur':
 ```yaml
   - platform: template
     sensors:
       cryptoinfo_main_wallet_ethereum_eur_24h_volume:
-        value_template: "{{ state_attr('sensor.cryptoinfo_main_wallet_ethereum_eur', 'volume') | float(0) | round(0) }}"
+        value_template: "{{ state_attr('sensor.cryptoinfo_main_wallet_ethereum_eur', '24h_volume') | float(0) | round(0) }}"
         unit_of_measurement: "€"
 ```
 
