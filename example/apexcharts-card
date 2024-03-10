@@ -1,0 +1,38 @@
+type: custom:apexcharts-card
+graph_span: 24h
+experimental:
+  color_threshold: true
+header:
+  show: true
+  title: ApexCharts-Card
+  show_states: true
+  colorize_states: true
+series:
+  - entity: sensor.cryptoinfo_btc_usd
+    name: BTC USD Price
+    stroke_width: 2
+  - entity: sensor.cryptoinfo_btc_usd
+    name: 24h Change
+    attribute: 24h_change
+    unit: '%'
+    show:
+      in_chart: false
+      header_color_threshold: true
+    color_threshold:
+      - value: 0
+        color: rgb(0,124,0)
+      - value: 0
+        color: rgb(255,0,0)
+  - entity: sensor.cryptoinfo_btc_usd
+    name: 30d Change
+    float_precision: 2
+    attribute: 30d_change
+    unit: '%'
+    show:
+      in_chart: false
+      header_color_threshold: true
+    color_threshold:
+      - value: 0
+        color: rgb(0,124,0)
+      - value: 0
+        color: rgb(255,0,0)
