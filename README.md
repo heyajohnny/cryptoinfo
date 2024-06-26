@@ -82,6 +82,9 @@ This example combines the total value of 3 sensors into this 1 template sensor:
         friendly_name: Total value of all my cryptocurrencies
 ```
 
+### API limit
+CoinGecko’s Public API has a rate limit of 5 to 15 calls per minute, depending on usage conditions worldwide.
+
 ### Issues and new functionality
 If there are any problems, please create an issue in https://github.com/heyajohnny/cryptoinfo/issues
 If you want new functionality added, please create an issue with a description of the new functionality that you want in: https://github.com/heyajohnny/cryptoinfo/issues
