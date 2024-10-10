@@ -1,7 +1,6 @@
 {
-  "name": "Cryptoinfo",
-  "content_in_root": false,
-  "render_readme": true,
-  "domains": ["sensor"],
-  "homeassistant": "0.100.0"
+    "name": "Integration blueprint",
+    "hide_default_branch": true,
+    "homeassistant": "2024.6.0",
+    "render_readme": true
 }
