@@ -1,0 +1,10 @@
+{
+    "name": "Cryptoinfo",
+    "content_in_root": false,
+    "render_readme": true,
+    "domains": [
+        "sensor"
+    ],
+    "country": [],
+    "homeassistant": "0.100.0"
+}
