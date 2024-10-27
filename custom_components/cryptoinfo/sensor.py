@@ -31,31 +31,28 @@ from .const.const import (
     CONF_ID,
 )
 
-from homeassistant.components.sensor import PLATFORM_SCHEMA, SensorDeviceClass
-import homeassistant.helpers.config_validation as cv
+from homeassistant.components.sensor import SensorDeviceClass
 from homeassistant.util import Throttle
 from homeassistant.helpers.entity import Entity
-
-PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
-    {
-        vol.Required(CONF_CRYPTOCURRENCY_NAME, default="bitcoin"): cv.string,
-        vol.Required(CONF_CURRENCY_NAME, default="usd"): cv.string,
-        vol.Optional(CONF_UNIT_OF_MEASUREMENT, default="$"): cv.string,
-        vol.Required(CONF_MULTIPLIER, default=1): cv.string,
-        vol.Required(CONF_UPDATE_FREQUENCY, default=60): cv.string,
-        vol.Optional(CONF_ID, default=""): cv.string,
-    }
-)
+from homeassistant import config_entries
+from homeassistant.core import HomeAssistant
+from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 
-def setup_platform(hass, config, add_entities, discovery_info=None):
+async def async_setup_entry(
+    hass: HomeAssistant,
+    config_entry: config_entries.ConfigEntry,
+    async_add_entities: AddEntitiesCallback,
+) -> None:
     _LOGGER.debug("Setup Cryptoinfo sensor")
+
+    config = config_entry.data
 
     id_name = config.get(CONF_ID)
     cryptocurrency_name = config.get(CONF_CRYPTOCURRENCY_NAME).lower().strip()
     currency_name = config.get(CONF_CURRENCY_NAME).strip()
     unit_of_measurement = config.get(CONF_UNIT_OF_MEASUREMENT).strip()
-    multiplier = config.get(CONF_MULTIPLIER).strip()
+    multiplier = config.get(CONF_MULTIPLIER)
     update_frequency = timedelta(minutes=(float(config.get(CONF_UPDATE_FREQUENCY))))
 
     entities = []
@@ -75,7 +72,7 @@ def setup_platform(hass, config, add_entities, discovery_info=None):
         _LOGGER.error(error.reason)
         return False
 
-    add_entities(entities)
+    async_add_entities(entities)
 
 
 class CryptoinfoSensor(Entity):
@@ -115,7 +112,7 @@ class CryptoinfoSensor(Entity):
         self._circulating_supply = None
         self._total_supply = None
         self._state_class = "measurement"
-        self._attr_unique_id = cryptocurrency_name + currency_name + multiplier
+        self._attr_unique_id = cryptocurrency_name + currency_name + str(multiplier)
 
     @property
     def name(self):
