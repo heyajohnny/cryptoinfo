@@ -24,6 +24,16 @@ from .const.const import (
 
 import voluptuous as vol
 
+PLACEHOLDERS = {
+    "description_help": "For more information, see the <a href='https://github.com/heyajohnny/cryptoinfo' target='_blank'>documentation</a>.",
+    "id_help": "Unique name for the sensor",
+    "currency_name_help": "One of the currency names in <a href='https://api.coingecko.com/api/v3/simple/supported_vs_currencies' target='_blank'>this list</a>.",
+    "cryptocurrency_name_help": "The 'id' value from one of the coins/tokens in <a href='https://api.coingecko.com/api/v3/coins/list' target='_blank'>this list</a>.",
+    "unit_of_measurement_help": "Do you want to use a currency symbol? (<a href='https://en.wikipedia.org/wiki/Currency_symbol#List_of_currency_symbols_currently_in_use' target='_blank'>Symbol list</a>)",
+    "multiplier_help": "The number of coins/tokens",
+    "update_frequency_help": "How often should the value be refreshed? Beware of the <a href='https://support.coingecko.com/hc/en-us/articles/4538771776153-What-is-the-rate-limit-for-CoinGecko-API-public-plan' target='_blank'>CoinGecko rate limit</a> when tracking multiple cryptocurrencies.",
+}
+
 
 class CryptoInfoConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     VERSION = 1
@@ -61,8 +71,11 @@ class CryptoInfoConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 ): cv.positive_float,
             }
         )
+
         return self.async_show_form(
-            step_id="reconfigure", data_schema=cryptoinfo_schema
+            step_id="reconfigure",
+            data_schema=cryptoinfo_schema,
+            description_placeholders=PLACEHOLDERS,
         )
 
     async def async_step_user(self, info):
@@ -84,4 +97,8 @@ class CryptoInfoConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             }
         )
 
-        return self.async_show_form(step_id="user", data_schema=cryptoinfo_schema)
+        return self.async_show_form(
+            step_id="user",
+            data_schema=cryptoinfo_schema,
+            description_placeholders=PLACEHOLDERS,
+        )
