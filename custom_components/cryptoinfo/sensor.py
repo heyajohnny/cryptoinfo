@@ -92,12 +92,15 @@ class CryptoinfoSensor(Entity):
         self.multiplier = multiplier
         self.update = Throttle(update_frequency)(self._update)
         self._attr_device_class = SensorDeviceClass.MONETARY
-        self._name = (
-            SENSOR_PREFIX
-            + (id_name + " " if len(id_name) > 0 else "")
+        self.entity_id = "sensor." + (
+            (SENSOR_PREFIX + (id_name + " " if len(id_name) > 0 else ""))
+            .lower()
+            .replace(" ", "_")
             + cryptocurrency_name
-            + " "
+            + "_"
             + currency_name
+            + "_"
+            + str(multiplier)
         )
         self._icon = "mdi:bitcoin"
         self._state = None
@@ -112,11 +115,13 @@ class CryptoinfoSensor(Entity):
         self._circulating_supply = None
         self._total_supply = None
         self._state_class = "measurement"
-        self._attr_unique_id = cryptocurrency_name + currency_name + str(multiplier)
-
-    @property
-    def name(self):
-        return self._name
+        self._attr_unique_id = (
+            SENSOR_PREFIX
+            + (id_name + " " if len(id_name) > 0 else "")
+            + cryptocurrency_name
+            + currency_name
+            + str(multiplier)
+        )
 
     @property
     def icon(self):
