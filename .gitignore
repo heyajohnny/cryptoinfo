@@ -4,5 +4,8 @@
 !LICENSE
 !README.md
 !custom_components/
-!custom_components/*
-!custom_components/cryptoinfo/*
+!custom_components/cryptoinfo/
+!custom_components/cryptoinfo/**
+*.pyc
+*.pyo
+*.pyd
