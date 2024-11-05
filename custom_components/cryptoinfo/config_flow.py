@@ -11,6 +11,8 @@ import voluptuous as vol
 from homeassistant import config_entries
 from homeassistant.helpers import config_validation as cv
 
+from .helper.crypto_info_data import CryptoInfoData
+
 from .const.const import (
     _LOGGER,
     CONF_CRYPTOCURRENCY_NAME,
@@ -35,11 +37,6 @@ PLACEHOLDERS = {
 }
 
 
-class CryptoInfoData:
-    def __init__(self):
-        self.min_time_between_requests = 1.0  # default value
-
-
 class CryptoInfoConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     VERSION = 1
 
@@ -53,9 +50,19 @@ class CryptoInfoConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     CONF_MIN_TIME_BETWEEN_REQUESTS
                 ]
 
-            return self.async_update_reload_and_abort(
-                entry, data=user_input, reason="reconfigure_successful"
+            # Create new data combining old entry data with new user input
+            new_data = {**entry.data, **user_input}
+
+            # Update entry data
+            self.hass.config_entries.async_update_entry(
+                entry,
+                data=new_data,
             )
+
+            # Reload the entry
+            await self.hass.config_entries.async_reload(entry.entry_id)
+
+            return self.async_abort(reason="reconfigure_successful")
 
         return await self._redo_configuration(entry.data)
 
@@ -105,17 +112,19 @@ class CryptoInfoConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         default_min_time = 1.0
         if DOMAIN in self.hass.data:
             default_min_time = self.hass.data[DOMAIN].min_time_between_requests
+        else:
+            # Initialize data if it doesn't exist
+            self.hass.data[DOMAIN] = CryptoInfoData(self.hass)
+            await self.hass.data[DOMAIN].async_initialize()
+            default_min_time = self.hass.data[DOMAIN].min_time_between_requests
 
-        if info is not None:
-            await self.async_set_unique_id(info["id"])
-            self._abort_if_unique_id_configured()
+            if info is not None:
+                await self.async_set_unique_id(info["id"])
+                self._abort_if_unique_id_configured()
 
-            # Update the shared data
-            if DOMAIN not in self.hass.data:
-                self.hass.data[DOMAIN] = CryptoInfoData()
-            self.hass.data[DOMAIN].min_time_between_requests = info[
-                CONF_MIN_TIME_BETWEEN_REQUESTS
-            ]
+                self.hass.data[DOMAIN].min_time_between_requests = info[
+                    CONF_MIN_TIME_BETWEEN_REQUESTS
+                ]
 
             # create the entry and save the value of min_time_between_requests in the options
             return self.async_create_entry(
