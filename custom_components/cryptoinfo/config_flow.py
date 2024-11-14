@@ -19,7 +19,7 @@ from .const.const import (
     CONF_CURRENCY_NAME,
     CONF_ID,
     CONF_MIN_TIME_BETWEEN_REQUESTS,
-    CONF_MULTIPLIER,
+    CONF_MULTIPLIERS,
     CONF_UNIT_OF_MEASUREMENT,
     CONF_UPDATE_FREQUENCY,
     DOMAIN,
@@ -31,7 +31,7 @@ PLACEHOLDERS = {
     "currency_name_help": "One of the currency names in <a href='https://api.coingecko.com/api/v3/simple/supported_vs_currencies' target='_blank'>this list</a>.",
     "cryptocurrency_names_help": "The 'id' values from one or more of the coins/tokens in <a href='https://api.coingecko.com/api/v3/coins/list' target='_blank'>this list</a>. seperated by , characters",
     "unit_of_measurement_help": "Do you want to use a currency symbol? (<a href='https://en.wikipedia.org/wiki/Currency_symbol#List_of_currency_symbols_currently_in_use' target='_blank'>Symbol list</a>)",
-    "multiplier_help": "The number of coins/tokens",
+    "multipliers_help": "The number of coins/tokens (seperated by , characters for the number of currency names)",
     "update_frequency_help": "How often should the value be refreshed? Beware of the <a href='https://support.coingecko.com/hc/en-us/articles/4538771776153-What-is-the-rate-limit-for-CoinGecko-API-public-plan' target='_blank'>CoinGecko rate limit</a> when tracking multiple cryptocurrencies.",
     "min_time_between_requests_help": "The minimum time between the other entities and this entity to make a data request to the API. (This property is shared and the same for every entity)",
 }
@@ -83,8 +83,8 @@ class CryptoInfoConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     CONF_CURRENCY_NAME, default=entry_data[CONF_CURRENCY_NAME]
                 ): str,
                 vol.Required(
-                    CONF_MULTIPLIER, default=entry_data[CONF_MULTIPLIER]
-                ): cv.positive_int,
+                    CONF_MULTIPLIERS, default=entry_data[CONF_MULTIPLIERS]
+                ): str,
                 vol.Optional(
                     CONF_UNIT_OF_MEASUREMENT,
                     default=entry_data[CONF_UNIT_OF_MEASUREMENT],
@@ -124,7 +124,7 @@ class CryptoInfoConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 vol.Required(
                     CONF_CRYPTOCURRENCY_NAMES, default="bitcoin, ethereum"
                 ): str,
-                vol.Required(CONF_MULTIPLIER, default=1): cv.positive_int,
+                vol.Required(CONF_MULTIPLIERS, default="1, 32"): str,
                 vol.Required(CONF_CURRENCY_NAME, default="usd"): str,
                 vol.Optional(CONF_UNIT_OF_MEASUREMENT, default="$"): str,
                 vol.Required(CONF_UPDATE_FREQUENCY, default=60): cv.positive_float,

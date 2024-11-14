@@ -11,11 +11,16 @@ create an id per entity (ascending integer/iterator starting at 0 + number of ot
 keep track of the last updated time and last updated id. when the current time > last updated time and (the id > last id or if it was the highest id, the first id)
 """
 
-from typing import Any, Dict
-import requests
-import voluptuous as vol
-from datetime import datetime, date, timedelta
 import urllib.error
+from datetime import date, datetime, timedelta
+from typing import Any, Dict
+
+from homeassistant import config_entries
+from homeassistant.components.sensor import SensorDeviceClass
+from homeassistant.core import HomeAssistant
+from homeassistant.helpers import aiohttp_client
+from homeassistant.helpers.entity import Entity
+from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import (
     CoordinatorEntity,
     DataUpdateCoordinator,
@@ -23,34 +28,28 @@ from homeassistant.helpers.update_coordinator import (
 
 from .const.const import (
     _LOGGER,
+    API_ENDPOINT,
+    ATTR_1H_CHANGE,
+    ATTR_7D_CHANGE,
+    ATTR_24H_CHANGE,
+    ATTR_24H_VOLUME,
+    ATTR_30D_CHANGE,
+    ATTR_BASE_PRICE,
+    ATTR_CIRCULATING_SUPPLY,
+    ATTR_LAST_UPDATE,
+    ATTR_MARKET_CAP,
+    ATTR_MULTIPLIER,
+    ATTR_TOTAL_SUPPLY,
     CONF_CRYPTOCURRENCY_NAMES,
     CONF_CURRENCY_NAME,
+    CONF_ID,
     CONF_MIN_TIME_BETWEEN_REQUESTS,
-    CONF_MULTIPLIER,
+    CONF_MULTIPLIERS,
     CONF_UNIT_OF_MEASUREMENT,
     CONF_UPDATE_FREQUENCY,
     DOMAIN,
     SENSOR_PREFIX,
-    ATTR_LAST_UPDATE,
-    ATTR_24H_VOLUME,
-    ATTR_BASE_PRICE,
-    ATTR_1H_CHANGE,
-    ATTR_24H_CHANGE,
-    ATTR_7D_CHANGE,
-    ATTR_30D_CHANGE,
-    ATTR_MARKET_CAP,
-    ATTR_CIRCULATING_SUPPLY,
-    ATTR_TOTAL_SUPPLY,
-    API_ENDPOINT,
-    CONF_ID,
 )
-
-from homeassistant.components.sensor import SensorDeviceClass
-from homeassistant.util import Throttle
-from homeassistant.helpers.entity import Entity
-from homeassistant import config_entries
-from homeassistant.core import HomeAssistant
-from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 
 async def async_setup_entry(
@@ -66,7 +65,7 @@ async def async_setup_entry(
     cryptocurrency_names = config.get(CONF_CRYPTOCURRENCY_NAMES).lower().strip()
     currency_name = config.get(CONF_CURRENCY_NAME).strip()
     unit_of_measurement = config.get(CONF_UNIT_OF_MEASUREMENT).strip()
-    multiplier = config.get(CONF_MULTIPLIER)
+    multipliers = config.get(CONF_MULTIPLIERS).strip()
     update_frequency = timedelta(minutes=(float(config.get(CONF_UPDATE_FREQUENCY))))
 
     # Create coordinator for centralized data fetching
@@ -82,8 +81,18 @@ async def async_setup_entry(
 
     entities = []
     crypto_list = [crypto.strip() for crypto in cryptocurrency_names.split(",")]
+    multipliers_list = [multiplier.strip() for multiplier in multipliers.split(",")]
 
-    for cryptocurrency_name in crypto_list:
+    multipliers_length = len(multipliers_list)
+    crypto_list_length = len(crypto_list)
+
+    if multipliers_length != crypto_list_length:
+        _LOGGER.error(
+            f"Length mismatch: multipliers ({multipliers_length}) and cryptocurrency names ({crypto_list_length}) must have the same length"
+        )
+        return False
+
+    for i, cryptocurrency_name in enumerate(crypto_list):
         try:
             entities.append(
                 CryptoinfoSensor(
@@ -91,7 +100,7 @@ async def async_setup_entry(
                     cryptocurrency_name,
                     currency_name,
                     unit_of_measurement,
-                    multiplier,
+                    multipliers_list[i],
                     id_name,
                 )
             )
@@ -132,13 +141,11 @@ class CryptoDataCoordinator(DataUpdateCoordinator):
         _LOGGER.warning(self.cryptocurrency_names)
 
         try:
-            async with (
-                self.hass.helpers.aiohttp_client.async_get_clientsession() as session
-            ):
-                async with session.get(url) as response:
-                    response.raise_for_status()
-                    data = await response.json()
-                    return {coin["id"]: coin for coin in data}
+            session = aiohttp_client.async_get_clientsession(self.hass)
+            async with session.get(url) as response:
+                response.raise_for_status()
+                data = await response.json()
+                return {coin["id"]: coin for coin in data}
         except Exception as err:
             _LOGGER.error(f"Error fetching data: {err}")
             raise
@@ -151,7 +158,7 @@ class CryptoinfoSensor(CoordinatorEntity):
         cryptocurrency_name: str,
         currency_name: str,
         unit_of_measurement: str,
-        multiplier: float,
+        multiplier: str,
         id_name: str,
     ):
         super().__init__(coordinator)
@@ -168,7 +175,7 @@ class CryptoinfoSensor(CoordinatorEntity):
             + "_"
             + currency_name
             + "_"
-            + str(multiplier)
+            + multiplier
         )
         self._icon = "mdi:bitcoin"
         self._state_class = "measurement"
@@ -177,7 +184,7 @@ class CryptoinfoSensor(CoordinatorEntity):
             + (id_name + " " if len(id_name) > 0 else "")
             + cryptocurrency_name
             + currency_name
-            + str(multiplier)
+            + multiplier
         )
 
     @property
@@ -211,6 +218,7 @@ class CryptoinfoSensor(CoordinatorEntity):
             return {
                 ATTR_LAST_UPDATE: datetime.today().strftime("%d-%m-%Y %H:%M"),
                 ATTR_BASE_PRICE: None,
+                ATTR_MULTIPLIER: None,
                 ATTR_24H_VOLUME: None,
                 ATTR_1H_CHANGE: None,
                 ATTR_24H_CHANGE: None,
@@ -225,6 +233,7 @@ class CryptoinfoSensor(CoordinatorEntity):
         return {
             ATTR_LAST_UPDATE: datetime.today().strftime("%d-%m-%Y %H:%M"),
             ATTR_BASE_PRICE: data["current_price"],
+            ATTR_MULTIPLIER: self.multiplier,
             ATTR_24H_VOLUME: data["total_volume"],
             ATTR_1H_CHANGE: data["price_change_percentage_1h_in_currency"],
             ATTR_24H_CHANGE: data["price_change_percentage_24h_in_currency"],
