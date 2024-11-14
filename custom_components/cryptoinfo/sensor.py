@@ -70,10 +70,7 @@ async def async_setup_entry(
 
     # Create coordinator for centralized data fetching
     coordinator = CryptoDataCoordinator(
-        hass,
-        cryptocurrency_names,
-        currency_name,
-        update_frequency,
+        hass, cryptocurrency_names, currency_name, update_frequency, id_name
     )
 
     # Wait for coordinator to do first update
@@ -118,6 +115,7 @@ class CryptoDataCoordinator(DataUpdateCoordinator):
         cryptocurrency_names: str,
         currency_name: str,
         update_frequency: timedelta,
+        id_name: str,
     ):
         super().__init__(
             hass,
@@ -127,6 +125,7 @@ class CryptoDataCoordinator(DataUpdateCoordinator):
         )
         self.cryptocurrency_names = cryptocurrency_names
         self.currency_name = currency_name
+        self.id_name = id_name
 
     async def _async_update_data(self):
         """Fetch data from API endpoint."""
@@ -137,7 +136,7 @@ class CryptoDataCoordinator(DataUpdateCoordinator):
             f"&price_change_percentage=1h%2C24h%2C7d%2C30d"
         )
 
-        _LOGGER.warning("Fetch data from API endpoint")
+        _LOGGER.warning(f"Fetch data from API endpoint: {self.id_name}")
         _LOGGER.warning(self.cryptocurrency_names)
 
         try:
