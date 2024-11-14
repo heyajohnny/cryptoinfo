@@ -3,12 +3,10 @@
 Sensor component for Cryptoinfo
 Author: Johnny Visser
 
-TODO: logic for the min_time_between_requests.
-For every entry there's a coordinator.
-The min_time_between_requests needs to be the time between the requests
-of these coordinators. Maybe
-create an id per entity (ascending integer/iterator starting at 0 + number of other entities).
-keep track of the last updated time and last updated id. when the current time > last updated time and (the id > last id or if it was the highest id, the first id)
+TODO: Test 0 for min_time_between_requests
+Update README
+Test the non corresponding crypto_currencies length and multipliers length
+Test adding / removing sensors
 """
 
 import urllib.error
@@ -67,10 +65,18 @@ async def async_setup_entry(
     unit_of_measurement = config.get(CONF_UNIT_OF_MEASUREMENT).strip()
     multipliers = config.get(CONF_MULTIPLIERS).strip()
     update_frequency = timedelta(minutes=(float(config.get(CONF_UPDATE_FREQUENCY))))
+    min_time_between_requests = timedelta(
+        minutes=(float(config.get(CONF_MIN_TIME_BETWEEN_REQUESTS)))
+    )
 
     # Create coordinator for centralized data fetching
     coordinator = CryptoDataCoordinator(
-        hass, cryptocurrency_names, currency_name, update_frequency, id_name
+        hass,
+        cryptocurrency_names,
+        currency_name,
+        update_frequency,
+        min_time_between_requests,
+        id_name,
     )
 
     # Wait for coordinator to do first update
@@ -109,12 +115,17 @@ async def async_setup_entry(
 
 
 class CryptoDataCoordinator(DataUpdateCoordinator):
+    _instance_count = 0  # Class variable to track number of coordinators
+    _last_update_time = None
+    _last_updated_id = None
+
     def __init__(
         self,
         hass: HomeAssistant,
         cryptocurrency_names: str,
         currency_name: str,
         update_frequency: timedelta,
+        min_time_between_requests: timedelta,
         id_name: str,
     ):
         super().__init__(
@@ -123,12 +134,55 @@ class CryptoDataCoordinator(DataUpdateCoordinator):
             name="Crypto Data",
             update_interval=update_frequency,
         )
+        self.instance_id = (
+            CryptoDataCoordinator._instance_count
+        )  # Assign current count as instance ID
+        CryptoDataCoordinator._instance_count += 1  # Increment the counter
         self.cryptocurrency_names = cryptocurrency_names
         self.currency_name = currency_name
         self.id_name = id_name
+        self.min_time_between_requests = min_time_between_requests
 
     async def _async_update_data(self):
-        """Fetch data from API endpoint."""
+        """Fetch data from API endpoint with coordinated timing."""
+        current_time = datetime.now()
+
+        # If this is the first ever request
+        if CryptoDataCoordinator._last_update_time is None:
+            should_update = True
+        else:
+            time_since_last_request = (
+                current_time - CryptoDataCoordinator._last_update_time
+            )
+
+            # Check if enough time has passed since the last request
+            # add 1 second to the time_since_last_request, because
+            # else we could just miss the update
+            if (
+                time_since_last_request + timedelta(seconds=1)
+                < self.min_time_between_requests
+            ):
+                _LOGGER.debug(
+                    f"Coordinator {self.instance_id} waiting for time between requests"
+                )
+                return self.data if self.data else None
+
+            # Check if it's this coordinator's turn
+            last_id = CryptoDataCoordinator._last_updated_id
+            if last_id is None:
+                should_update = self.instance_id == 0
+            else:
+                next_id = (last_id + 1) % CryptoDataCoordinator._instance_count
+                should_update = self.instance_id == next_id
+
+            if not should_update:
+                _LOGGER.debug(f"Coordinator {self.instance_id} waiting for turn")
+                return self.data if self.data else None
+
+        _LOGGER.warning(
+            f"Fetch data from API endpoint, sensor: {self.id_name} instance_id: {self.instance_id} cryptocurrency_names: {self.cryptocurrency_names}"
+        )
+
         url = (
             f"{API_ENDPOINT}coins/markets"
             f"?ids={self.cryptocurrency_names}"
@@ -136,14 +190,16 @@ class CryptoDataCoordinator(DataUpdateCoordinator):
             f"&price_change_percentage=1h%2C24h%2C7d%2C30d"
         )
 
-        _LOGGER.warning(f"Fetch data from API endpoint: {self.id_name}")
-        _LOGGER.warning(self.cryptocurrency_names)
-
         try:
             session = aiohttp_client.async_get_clientsession(self.hass)
             async with session.get(url) as response:
                 response.raise_for_status()
                 data = await response.json()
+
+                # Update the last update time and ID only after successful request
+                CryptoDataCoordinator._last_update_time = current_time
+                CryptoDataCoordinator._last_updated_id = self.instance_id
+
                 return {coin["id"]: coin for coin in data}
         except Exception as err:
             _LOGGER.error(f"Error fetching data: {err}")
