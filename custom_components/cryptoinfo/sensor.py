@@ -3,10 +3,10 @@
 Sensor component for Cryptoinfo
 Author: Johnny Visser
 
-TODO: Test 0 for min_time_between_requests
+TODO:
 Update README
 Test the non corresponding crypto_currencies length and multipliers length
-Test adding / removing sensors
+Now all the first coordinator requests are executed at once. I think that's not wat we want
 """
 
 import urllib.error
@@ -115,6 +115,7 @@ async def async_setup_entry(
 
 
 class CryptoDataCoordinator(DataUpdateCoordinator):
+    _active_coordinators = set()  # Set to track active coordinator IDs
     _instance_count = 0  # Class variable to track number of coordinators
     _last_update_time = None
     _last_updated_id = None
@@ -138,42 +139,67 @@ class CryptoDataCoordinator(DataUpdateCoordinator):
             CryptoDataCoordinator._instance_count
         )  # Assign current count as instance ID
         CryptoDataCoordinator._instance_count += 1  # Increment the counter
+        CryptoDataCoordinator._active_coordinators.add(self.instance_id)
         self.cryptocurrency_names = cryptocurrency_names
         self.currency_name = currency_name
         self.id_name = id_name
         self.min_time_between_requests = min_time_between_requests
+        self.update_frequency = update_frequency
+
+    async def async_will_remove_from_hass(self) -> None:
+        """Handle removal from Home Assistant."""
+        _LOGGER.warning(f"Removing coordinator {self.instance_id}")
+        CryptoDataCoordinator._active_coordinators.discard(self.instance_id)
+        # If this was the last updated ID, reset it
+        if CryptoDataCoordinator._last_updated_id == self.instance_id:
+            CryptoDataCoordinator._last_updated_id = None
 
     async def _async_update_data(self):
         """Fetch data from API endpoint with coordinated timing."""
         current_time = datetime.now()
 
-        # If this is the first ever request
-        if CryptoDataCoordinator._last_update_time is None:
+        # If this is the first ever request or no active coordinators
+        if (
+            CryptoDataCoordinator._last_update_time is None
+            or not CryptoDataCoordinator._active_coordinators
+        ):
             should_update = True
         else:
             time_since_last_request = (
                 current_time - CryptoDataCoordinator._last_update_time
             )
 
-            # Check if enough time has passed since the last request
-            # add 1 second to the time_since_last_request, because
-            # else we could just miss the update
             if (
                 time_since_last_request + timedelta(seconds=1)
                 < self.min_time_between_requests
             ):
-                _LOGGER.debug(
-                    f"Coordinator {self.instance_id} waiting for time between requests"
+                _LOGGER.warning(
+                    f"Not enough time has passed {self.instance_id} {self.min_time_between_requests} "
+                    f"waiting for time between requests {time_since_last_request} frequency:{self.update_frequency}"
                 )
                 return self.data if self.data else None
 
-            # Check if it's this coordinator's turn
+            # Find the next active coordinator ID
             last_id = CryptoDataCoordinator._last_updated_id
-            if last_id is None:
-                should_update = self.instance_id == 0
+            _LOGGER.warning(
+                f"Last id {last_id}, Active coordinators: {sorted(CryptoDataCoordinator._active_coordinators)}"
+            )
+
+            if (
+                last_id is None
+                or last_id not in CryptoDataCoordinator._active_coordinators
+            ):
+                should_update = self.instance_id == min(
+                    CryptoDataCoordinator._active_coordinators
+                )
             else:
-                next_id = (last_id + 1) % CryptoDataCoordinator._instance_count
+                # Get sorted list of active coordinators
+                active_ids = sorted(CryptoDataCoordinator._active_coordinators)
+                current_index = active_ids.index(last_id)
+                next_index = (current_index + 1) % len(active_ids)
+                next_id = active_ids[next_index]
                 should_update = self.instance_id == next_id
+                _LOGGER.warning(f"next_id {next_id}")
 
             if not should_update:
                 _LOGGER.debug(f"Coordinator {self.instance_id} waiting for turn")
@@ -203,7 +229,6 @@ class CryptoDataCoordinator(DataUpdateCoordinator):
                 return {coin["id"]: coin for coin in data}
         except Exception as err:
             _LOGGER.error(f"Error fetching data: {err}")
-            raise
 
 
 class CryptoinfoSensor(CoordinatorEntity):
@@ -298,3 +323,8 @@ class CryptoinfoSensor(CoordinatorEntity):
             ATTR_CIRCULATING_SUPPLY: data["circulating_supply"],
             ATTR_TOTAL_SUPPLY: data["total_supply"],
         }
+
+    async def async_will_remove_from_hass(self) -> None:
+        """Handle removal from Home Assistant."""
+        await self.coordinator.async_will_remove_from_hass()  # type: ignore
+        await super().async_will_remove_from_hass()
