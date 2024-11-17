@@ -5,7 +5,7 @@ Author: Johnny Visser
 
 TODO:
 Update README
-Test the non corresponding crypto_currencies length and multipliers length
+Remove/change all the logging to debug
 """
 
 import urllib.error
@@ -157,14 +157,31 @@ class CryptoDataCoordinator(DataUpdateCoordinator):
         """Fetch data from API endpoint with coordinated timing."""
         current_time = datetime.now()
 
-        # If this is the first ever request, set the last update time but don't fetch yet
-        # Set the last_updated_id to the first id, so the following update will update the next id
+        # If this is the first ever request, fetch data immediately
         if CryptoDataCoordinator._last_update_time is None:
             CryptoDataCoordinator._last_update_time = current_time
-            CryptoDataCoordinator._last_updated_id = min(
-                CryptoDataCoordinator._active_coordinators
+            CryptoDataCoordinator._last_updated_id = self.instance_id
+
+            _LOGGER.warning(
+                f"First request, fetching data for sensor: {self.id_name} instance_id: {self.instance_id} cryptocurrency_names: {self.cryptocurrency_names}"
             )
-            return None
+
+            url = (
+                f"{API_ENDPOINT}coins/markets"
+                f"?ids={self.cryptocurrency_names}"
+                f"&vs_currency={self.currency_name}"
+                f"&price_change_percentage=1h%2C24h%2C7d%2C30d"
+            )
+
+            try:
+                session = aiohttp_client.async_get_clientsession(self.hass)
+                async with session.get(url) as response:
+                    response.raise_for_status()
+                    data = await response.json()
+                    return {coin["id"]: coin for coin in data}
+            except Exception as err:
+                _LOGGER.error(f"Error fetching data: {err}")
+                return None
 
         time_since_last_request = current_time - CryptoDataCoordinator._last_update_time
 
