@@ -6,7 +6,6 @@ Author: Johnny Visser
 TODO:
 Update README
 Test the non corresponding crypto_currencies length and multipliers length
-Now all the first coordinator requests are executed at once. I think that's not wat we want
 """
 
 import urllib.error
@@ -158,52 +157,49 @@ class CryptoDataCoordinator(DataUpdateCoordinator):
         """Fetch data from API endpoint with coordinated timing."""
         current_time = datetime.now()
 
-        # If this is the first ever request or no active coordinators
+        # If this is the first ever request, set the last update time but don't fetch yet
+        # Set the last_updated_id to the first id, so the following update will update the next id
+        if CryptoDataCoordinator._last_update_time is None:
+            CryptoDataCoordinator._last_update_time = current_time
+            CryptoDataCoordinator._last_updated_id = min(
+                CryptoDataCoordinator._active_coordinators
+            )
+            return None
+
+        time_since_last_request = current_time - CryptoDataCoordinator._last_update_time
+
         if (
-            CryptoDataCoordinator._last_update_time is None
-            or not CryptoDataCoordinator._active_coordinators
+            time_since_last_request + timedelta(seconds=1)
+            < self.min_time_between_requests
         ):
-            should_update = True
-        else:
-            time_since_last_request = (
-                current_time - CryptoDataCoordinator._last_update_time
-            )
-
-            if (
-                time_since_last_request + timedelta(seconds=1)
-                < self.min_time_between_requests
-            ):
-                _LOGGER.warning(
-                    f"Not enough time has passed {self.instance_id} {self.min_time_between_requests} "
-                    f"waiting for time between requests {time_since_last_request} frequency:{self.update_frequency}"
-                )
-                return self.data if self.data else None
-
-            # Find the next active coordinator ID
-            last_id = CryptoDataCoordinator._last_updated_id
             _LOGGER.warning(
-                f"Last id {last_id}, Active coordinators: {sorted(CryptoDataCoordinator._active_coordinators)}"
+                f"Not enough time has passed {self.instance_id} {self.min_time_between_requests} "
+                f"waiting for time between requests {time_since_last_request} frequency:{self.update_frequency}"
             )
+            return self.data if self.data else None
 
-            if (
-                last_id is None
-                or last_id not in CryptoDataCoordinator._active_coordinators
-            ):
-                should_update = self.instance_id == min(
-                    CryptoDataCoordinator._active_coordinators
-                )
-            else:
-                # Get sorted list of active coordinators
-                active_ids = sorted(CryptoDataCoordinator._active_coordinators)
-                current_index = active_ids.index(last_id)
-                next_index = (current_index + 1) % len(active_ids)
-                next_id = active_ids[next_index]
-                should_update = self.instance_id == next_id
-                _LOGGER.warning(f"next_id {next_id}")
+        # Find the next active coordinator ID
+        last_id = CryptoDataCoordinator._last_updated_id
+        _LOGGER.warning(
+            f"Last id {last_id}, Active coordinators: {sorted(CryptoDataCoordinator._active_coordinators)}"
+        )
 
-            if not should_update:
-                _LOGGER.debug(f"Coordinator {self.instance_id} waiting for turn")
-                return self.data if self.data else None
+        if last_id is None or last_id not in CryptoDataCoordinator._active_coordinators:
+            should_update = self.instance_id == min(
+                CryptoDataCoordinator._active_coordinators
+            )
+        else:
+            # Get sorted list of active coordinators
+            active_ids = sorted(CryptoDataCoordinator._active_coordinators)
+            current_index = active_ids.index(last_id)
+            next_index = (current_index + 1) % len(active_ids)
+            next_id = active_ids[next_index]
+            should_update = self.instance_id == next_id
+            _LOGGER.warning(f"next_id {next_id}")
+
+        if not should_update:
+            _LOGGER.debug(f"Coordinator {self.instance_id} waiting for turn")
+            return self.data if self.data else None
 
         _LOGGER.warning(
             f"Fetch data from API endpoint, sensor: {self.id_name} instance_id: {self.instance_id} cryptocurrency_names: {self.cryptocurrency_names}"
