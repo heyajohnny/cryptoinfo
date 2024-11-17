@@ -51,7 +51,8 @@
             "reconfigure_successful": "Re-configuration was successful"
         },
         "error": {
-            "cannot_connect": "Error: Cannot connect"
+            "cannot_connect": "Error: Cannot connect",
+            "mismatch_values": "The number of cryptocurrency names ({crypto_count}) does not match the number of multipliers ({multiplier_count})"
         }
     },
     "description_placeholders": {
