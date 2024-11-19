@@ -41,7 +41,7 @@ The next step is to add cryptoinfo sensors to your Home Assistant:
 ### Properties
 - Identifier                                Unique name for the sensor
 - Cryptocurrency names                      One or more of the 'id' values (seperated by a , character) that you can find on this <a href='https://api.coingecko.com/api/v3/coins/list' target='_blank'>page</a>
-- Multipliers                               The number of coins / tokens (seperated by a , character). The number of Multipliers must match the number of Cryptocurrency names
+- Multipliers                               The number of coins/tokens (seperated by a , character). The number of Multipliers must match the number of Cryptocurrency names
 - Currency name                             One of the currency names that you can find on this <a href='https://api.coingecko.com/api/v3/simple/supported_vs_currencies' target='_blank'>page</a>
 - Unit of measurement                       You can use a currency symbol or you can make it empty. You can find some symbols on this <a href='https://en.wikipedia.org/wiki/Currency_symbol#List_of_currency_symbols_currently_in_use' target='_blank'>page</a>
 - Update frequency (minutes)                How often should the value be refreshed? Beware of the <a href='https://support.coingecko.com/hc/en-us/articles/4538771776153-What-is-the-rate-limit-for-CoinGecko-API-public-plan' target='_blank'>CoinGecko rate limit</a> when using multiple sensors
