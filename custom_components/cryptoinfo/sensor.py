@@ -2,21 +2,15 @@
 """
 Sensor component for Cryptoinfo
 Author: Johnny Visser
-
-TODO:
-Update README
-Remove/change all the logging to debug
 """
 
 import urllib.error
-from datetime import date, datetime, timedelta
-from typing import Any, Dict
+from datetime import datetime, timedelta
 
 from homeassistant import config_entries
-from homeassistant.components.sensor import SensorDeviceClass
+from homeassistant.components.sensor.const import SensorDeviceClass
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import aiohttp_client
-from homeassistant.helpers.entity import Entity
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import (
     CoordinatorEntity,
@@ -54,7 +48,7 @@ async def async_setup_entry(
     config_entry: config_entries.ConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
-    _LOGGER.warning("Setup Cryptoinfo sensor")
+    _LOGGER.debug("Setup Cryptoinfo sensor")
 
     config = config_entry.data
 
@@ -147,7 +141,7 @@ class CryptoDataCoordinator(DataUpdateCoordinator):
 
     async def async_will_remove_from_hass(self) -> None:
         """Handle removal from Home Assistant."""
-        _LOGGER.warning(f"Removing coordinator {self.instance_id}")
+        _LOGGER.debug(f"Removing coordinator {self.instance_id}")
         CryptoDataCoordinator._active_coordinators.discard(self.instance_id)
         # If this was the last updated ID, reset it
         if CryptoDataCoordinator._last_updated_id == self.instance_id:
@@ -162,7 +156,7 @@ class CryptoDataCoordinator(DataUpdateCoordinator):
             CryptoDataCoordinator._last_update_time = current_time
             CryptoDataCoordinator._last_updated_id = self.instance_id
 
-            _LOGGER.warning(
+            _LOGGER.debug(
                 f"First request, fetching data for sensor: {self.id_name} instance_id: {self.instance_id} cryptocurrency_names: {self.cryptocurrency_names}"
             )
 
@@ -189,7 +183,7 @@ class CryptoDataCoordinator(DataUpdateCoordinator):
             time_since_last_request + timedelta(seconds=1)
             < self.min_time_between_requests
         ):
-            _LOGGER.warning(
+            _LOGGER.debug(
                 f"Not enough time has passed {self.instance_id} {self.min_time_between_requests} "
                 f"waiting for time between requests {time_since_last_request} frequency:{self.update_frequency}"
             )
@@ -197,7 +191,7 @@ class CryptoDataCoordinator(DataUpdateCoordinator):
 
         # Find the next active coordinator ID
         last_id = CryptoDataCoordinator._last_updated_id
-        _LOGGER.warning(
+        _LOGGER.debug(
             f"Last id {last_id}, Active coordinators: {sorted(CryptoDataCoordinator._active_coordinators)}"
         )
 
@@ -212,13 +206,13 @@ class CryptoDataCoordinator(DataUpdateCoordinator):
             next_index = (current_index + 1) % len(active_ids)
             next_id = active_ids[next_index]
             should_update = self.instance_id == next_id
-            _LOGGER.warning(f"next_id {next_id}")
+            _LOGGER.debug(f"next_id {next_id}")
 
         if not should_update:
             _LOGGER.debug(f"Coordinator {self.instance_id} waiting for turn")
             return self.data if self.data else None
 
-        _LOGGER.warning(
+        _LOGGER.debug(
             f"Fetch data from API endpoint, sensor: {self.id_name} instance_id: {self.instance_id} cryptocurrency_names: {self.cryptocurrency_names}"
         )
 
