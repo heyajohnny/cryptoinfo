@@ -4,6 +4,9 @@
 
 #### Provides Home Assistant sensors for all cryptocurrencies supported by CoinGecko
 
+## Breaking changes for upgrading from v0.x.x to v1.x.x
+If you've just updated from v0.x.x to v1.x.x please remove the cryptoinfo sensor from your configuration.yaml and follow [Installation step 2](#installation-step-2)
+
 If you like my work, please buy me a coffee or donate some crypto currencies. This will keep me awake, asleep, or whatever :wink:
 
 <a href="https://www.buymeacoffee.com/1v3ckWD" target="_blank"><img src="https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png"></a><details>
@@ -11,7 +14,6 @@ If you like my work, please buy me a coffee or donate some crypto currencies. Th
 <img width="164px" alt="xmr" src="https://user-images.githubusercontent.com/20553716/210132784-63613225-d9da-427d-a20b-e1003045a1f4.png">
 <img width="164px" alt="btc" src="https://user-images.githubusercontent.com/20553716/210132426-6c58d8d1-b351-4ae7-9b61-cd5511cdb4ed.png">
 <img width="164px" alt="ada" src="https://user-images.githubusercontent.com/20553716/210132510-b1106b55-c9e3-413d-b8e0-26ba4e24a5de.png">
-<img width="164px" alt="iota" src="https://user-images.githubusercontent.com/20553716/210132585-9addbc8f-c293-4f63-b2fb-5f4b59af67fd.png">
 </details>
 
 If you need more advanced features than this project offers, see [Cryptoinfo Advanced](https://github.com/TheHolyRoger/hass-cryptoinfo)
@@ -21,32 +23,35 @@ There are 2 ways to install cryptoinfo:
 1. Download 'cryptoinfo' from the HACS store
 2. Copy the files in the /custom_components/cryptoinfo/ folder to: [homeassistant]/config/custom_components/cryptoinfo/
 
-### Installation step 2:
-The next step is to add cryptoinfo to your configuration.yaml. You can do that in 2 ways:
-1. Copy and paste the values from this [configuration.yaml](https://github.com/heyajohnny/cryptoinfo/blob/master/example/configuration.yaml) and adjust it according to your needs
-2. Copy and paste the values (and adjust according to your needs) from the configutation you see next
+### Installation step 2
+The next step is to add cryptoinfo sensors to your Home Assistant:
+1. Browse to your Home Assistant config page
+2. Press Settings --> Devices & Services
 
-Example config:
-```Configuration.yaml:
-  sensor:
-    - platform: cryptoinfo
-      id: "main wallet"                (optional, default = '') add some extra naming to the sensor
-      cryptocurrency_name: "ethereum"  (default = "bitcoin")
-      currency_name: "eur"             (default = "usd")
-      unit_of_measurement: "\u200b"    (default = "$")
-      multiplier: 1                    (default = 1) the currency value multiplied by this number
-      update_frequency: 15             (default = 60) number of minutes to refresh data of the sensor
-```
+![image](https://github.com/user-attachments/assets/c4812206-835e-4239-9757-8645ae6c772b)
 
-For the complete list of supported values for 'cryptocurrency_name', visit this page:
-https://api.coingecko.com/api/v3/coins/list and copy / paste the "id" value to use as 'cryptocurrency_name'
+3. Press 'Add Integration' and search for 'cryptoinfo' and select the 'cryptoinfo' integration
 
-For the complete list of supported values for 'currency_name', visit this page:
-https://api.coingecko.com/api/v3/simple/supported_vs_currencies and copy / paste the value to use as 'currency_name'
+![image](https://github.com/user-attachments/assets/83e3e165-61fa-4aa9-8421-9fc019bfae82)
+
+4. Fill in the 'add new sensor' form
+
+![image](https://github.com/user-attachments/assets/8ad3d15c-78ce-4c0a-892c-f0a967595f9d)
+
+### Properties
+- Identifier                                Unique name for the sensor
+- Cryptocurrency names                      One or more of the 'id' values (seperated by a , character) that you can find on this <a href='https://api.coingecko.com/api/v3/coins/list' target='_blank'>page</a>
+- Multipliers                               The number of coins / tokens (seperated by a , character). The number of Multipliers must match the number of Cryptocurrency names
+- Currency name                             One of the currency names that you can find on this <a href='https://api.coingecko.com/api/v3/simple/supported_vs_currencies' target='_blank'>page</a>
+- Unit of measurement                       You can use a currency symbol or you can make it empty. You can find some symbols on this <a href='https://en.wikipedia.org/wiki/Currency_symbol#List_of_currency_symbols_currently_in_use' target='_blank'>page</a>
+- Update frequency (minutes)                How often should the value be refreshed? Beware of the <a href='https://support.coingecko.com/hc/en-us/articles/4538771776153-What-is-the-rate-limit-for-CoinGecko-API-public-plan' target='_blank'>CoinGecko rate limit</a> when using multiple sensors
+- Minimum time between requests (minutes)   The minimum time between the other sensors and this sensor to make a data request to the API. (This property is shared and the same for every sensor). You can set this value to 0 if you only use 1 sensor
 
 ### Attributes
-There are 9 important attributes:
-- base_price          This will return the price of 1 coin / token in 'currency_name'(default = "usd") of the 'cryptocurrency_name'(default = "bitcoin")
+The entities have some important attributes:
+- last_update         This will return the date and time of the last update
+- base_price          This will return the price of 1 coin / token in 'currency_name'(default = "usd") of the 'cryptocurrency_name'
+- multiplier          This will return the number of coins / tokens
 - 24h_volume          This will return the 24 hour volume in 'currency_name'(default = "usd") of the 'cryptocurrency_name'(default = "bitcoin")
 - 1h_change           This will return the 1 hour change in percentage of the 'cryptocurrency_name'(default = "bitcoin")
 - 24h_change          This will return the 24 hour change in percentage of the 'cryptocurrency_name'(default = "bitcoin")
@@ -56,7 +61,7 @@ There are 9 important attributes:
 - circulating_supply  This will return the circulating supply of the 'cryptocurrency_name'(default = "bitcoin")
 - total_supply        This will return the total supply of the 'cryptocurrency_name'(default = "bitcoin")
 
-Example for usage of attributes.
+Template example for usage of attributes.
 This example creates a new sensor with the attribute value '24h_volume' of the sensor 'sensor.cryptoinfo_main_wallet_ethereum_eur':
 ```yaml
   - platform: template
@@ -65,7 +70,6 @@ This example creates a new sensor with the attribute value '24h_volume' of the s
         value_template: "{{ state_attr('sensor.cryptoinfo_main_wallet_ethereum_eur', '24h_volume') | float(0) | round(0) }}"
         unit_of_measurement: "€"
 ```
-
 
 If you want to know the total value of your cryptocurrencies, you could use this template as an example.
 This example combines the total value of 3 sensors into this 1 template sensor:
@@ -83,7 +87,7 @@ This example combines the total value of 3 sensors into this 1 template sensor:
 ```
 
 ### API limit
-CoinGecko’s Public API has a rate limit of 5 to 15 calls per minute, depending on usage conditions worldwide.
+CoinGecko’s Public API has a <a href='https://support.coingecko.com/hc/en-us/articles/4538771776153-What-is-the-rate-limit-for-CoinGecko-API-public-plan' target='_blank'>rate limit</a> of 5 to 15 calls per minute, depending on usage conditions worldwide.
 
 ### Issues and new functionality
 If there are any problems, please create an issue in https://github.com/heyajohnny/cryptoinfo/issues
