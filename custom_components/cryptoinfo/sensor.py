@@ -261,8 +261,6 @@ class CryptoinfoSensor(CoordinatorEntity):
             + cryptocurrency_name
             + "_"
             + currency_name
-            + "_"
-            + multiplier
         )
         self._icon = "mdi:bitcoin"
         self._state_class = "measurement"
@@ -271,7 +269,6 @@ class CryptoinfoSensor(CoordinatorEntity):
             + (id_name + " " if len(id_name) > 0 else "")
             + cryptocurrency_name
             + currency_name
-            + multiplier
         )
 
     @property
