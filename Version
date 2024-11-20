@@ -16,4 +16,5 @@ Version: 0.1.4 20220906 - Made the unit_of_measurement configurable with a defau
 Version: 0.1.5 20230323 - Use floating point precision for the update interval
 Version: 0.1.6 20230323 - Use floating point precision for the update interval (typo fix)
 Version: 0.1.7 20230330 - Better exception
-Version: 1.0.0
+Version: 1.0.0 20241119 - Complete refactor
+Version: 1.0.1 20241120 - Updated hacs.json + removed multiplier from identifier
