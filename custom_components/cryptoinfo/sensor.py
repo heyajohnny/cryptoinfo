@@ -28,17 +28,20 @@ from .const.const import (
     ATTR_BASE_PRICE,
     ATTR_CIRCULATING_SUPPLY,
     ATTR_LAST_UPDATE,
+    ATTR_CRYPTOCURRENCY_ID,
+    ATTR_CRYPTOCURRENCY_NAME,
+    ATTR_CRYPTOCURRENCY_SYMBOL,
+    ATTR_CURRENCY_NAME,
     ATTR_MARKET_CAP,
     ATTR_MULTIPLIER,
     ATTR_TOTAL_SUPPLY,
-    CONF_CRYPTOCURRENCY_NAMES,
+    CONF_CRYPTOCURRENCY_IDS,
     CONF_CURRENCY_NAME,
     CONF_ID,
     CONF_MIN_TIME_BETWEEN_REQUESTS,
     CONF_MULTIPLIERS,
     CONF_UNIT_OF_MEASUREMENT,
     CONF_UPDATE_FREQUENCY,
-    DOMAIN,
     SENSOR_PREFIX,
 )
 
@@ -53,7 +56,7 @@ async def async_setup_entry(
     config = config_entry.data
 
     id_name = config.get(CONF_ID)
-    cryptocurrency_names = config.get(CONF_CRYPTOCURRENCY_NAMES).lower().strip()
+    cryptocurrency_ids = config.get(CONF_CRYPTOCURRENCY_IDS).lower().strip()
     currency_name = config.get(CONF_CURRENCY_NAME).strip()
     unit_of_measurement = config.get(CONF_UNIT_OF_MEASUREMENT).strip()
     multipliers = config.get(CONF_MULTIPLIERS).strip()
@@ -65,7 +68,7 @@ async def async_setup_entry(
     # Create coordinator for centralized data fetching
     coordinator = CryptoDataCoordinator(
         hass,
-        cryptocurrency_names,
+        cryptocurrency_ids,
         currency_name,
         update_frequency,
         min_time_between_requests,
@@ -76,7 +79,7 @@ async def async_setup_entry(
     await coordinator.async_config_entry_first_refresh()
 
     entities = []
-    crypto_list = [crypto.strip() for crypto in cryptocurrency_names.split(",")]
+    crypto_list = [crypto.strip() for crypto in cryptocurrency_ids.split(",")]
     multipliers_list = [multiplier.strip() for multiplier in multipliers.split(",")]
 
     multipliers_length = len(multipliers_list)
@@ -84,16 +87,16 @@ async def async_setup_entry(
 
     if multipliers_length != crypto_list_length:
         _LOGGER.error(
-            f"Length mismatch: multipliers ({multipliers_length}) and cryptocurrency names ({crypto_list_length}) must have the same length"
+            f"Length mismatch: multipliers ({multipliers_length}) and cryptocurrency id's ({crypto_list_length}) must have the same length"
         )
         return False
 
-    for i, cryptocurrency_name in enumerate(crypto_list):
+    for i, cryptocurrency_id in enumerate(crypto_list):
         try:
             entities.append(
                 CryptoinfoSensor(
                     coordinator,
-                    cryptocurrency_name,
+                    cryptocurrency_id,
                     currency_name,
                     unit_of_measurement,
                     multipliers_list[i],
@@ -116,7 +119,7 @@ class CryptoDataCoordinator(DataUpdateCoordinator):
     def __init__(
         self,
         hass: HomeAssistant,
-        cryptocurrency_names: str,
+        cryptocurrency_ids: str,
         currency_name: str,
         update_frequency: timedelta,
         min_time_between_requests: timedelta,
@@ -133,7 +136,7 @@ class CryptoDataCoordinator(DataUpdateCoordinator):
         )  # Assign current count as instance ID
         CryptoDataCoordinator._instance_count += 1  # Increment the counter
         CryptoDataCoordinator._active_coordinators.add(self.instance_id)
-        self.cryptocurrency_names = cryptocurrency_names
+        self.cryptocurrency_ids = cryptocurrency_ids
         self.currency_name = currency_name
         self.id_name = id_name
         self.min_time_between_requests = min_time_between_requests
@@ -157,12 +160,12 @@ class CryptoDataCoordinator(DataUpdateCoordinator):
             CryptoDataCoordinator._last_updated_id = self.instance_id
 
             _LOGGER.debug(
-                f"First request, fetching data for sensor: {self.id_name} instance_id: {self.instance_id} cryptocurrency_names: {self.cryptocurrency_names}"
+                f"First request, fetching data for sensor: {self.id_name} instance_id: {self.instance_id} cryptocurrency_ids: {self.cryptocurrency_ids}"
             )
 
             url = (
                 f"{API_ENDPOINT}coins/markets"
-                f"?ids={self.cryptocurrency_names}"
+                f"?ids={self.cryptocurrency_ids}"
                 f"&vs_currency={self.currency_name}"
                 f"&price_change_percentage=1h%2C24h%2C7d%2C30d"
             )
@@ -213,12 +216,12 @@ class CryptoDataCoordinator(DataUpdateCoordinator):
             return self.data if self.data else None
 
         _LOGGER.debug(
-            f"Fetch data from API endpoint, sensor: {self.id_name} instance_id: {self.instance_id} cryptocurrency_names: {self.cryptocurrency_names}"
+            f"Fetch data from API endpoint, sensor: {self.id_name} instance_id: {self.instance_id} cryptocurrency_ids: {self.cryptocurrency_ids}"
         )
 
         url = (
             f"{API_ENDPOINT}coins/markets"
-            f"?ids={self.cryptocurrency_names}"
+            f"?ids={self.cryptocurrency_ids}"
             f"&vs_currency={self.currency_name}"
             f"&price_change_percentage=1h%2C24h%2C7d%2C30d"
         )
@@ -242,14 +245,14 @@ class CryptoinfoSensor(CoordinatorEntity):
     def __init__(
         self,
         coordinator: CryptoDataCoordinator,
-        cryptocurrency_name: str,
+        cryptocurrency_id: str,
         currency_name: str,
         unit_of_measurement: str,
         multiplier: str,
         id_name: str,
     ):
         super().__init__(coordinator)
-        self.cryptocurrency_name = cryptocurrency_name
+        self.cryptocurrency_id = cryptocurrency_id
         self.currency_name = currency_name
         self._unit_of_measurement = unit_of_measurement
         self.multiplier = multiplier
@@ -258,7 +261,7 @@ class CryptoinfoSensor(CoordinatorEntity):
             (SENSOR_PREFIX + (id_name + " " if len(id_name) > 0 else ""))
             .lower()
             .replace(" ", "_")
-            + cryptocurrency_name
+            + cryptocurrency_id
             + "_"
             + currency_name
         )
@@ -267,7 +270,7 @@ class CryptoinfoSensor(CoordinatorEntity):
         self._attr_unique_id = (
             SENSOR_PREFIX
             + (id_name + " " if len(id_name) > 0 else "")
-            + cryptocurrency_name
+            + cryptocurrency_id
             + currency_name
         )
 
@@ -286,9 +289,9 @@ class CryptoinfoSensor(CoordinatorEntity):
     @property
     def state(self):
         """Return the state of the sensor."""
-        if self.coordinator.data and self.cryptocurrency_name in self.coordinator.data:
+        if self.coordinator.data and self.cryptocurrency_id in self.coordinator.data:
             return float(
-                self.coordinator.data[self.cryptocurrency_name]["current_price"]
+                self.coordinator.data[self.cryptocurrency_id]["current_price"]
             ) * float(self.multiplier)
         return None
 
@@ -297,10 +300,12 @@ class CryptoinfoSensor(CoordinatorEntity):
         """Return the state attributes."""
         if (
             not self.coordinator.data
-            or self.cryptocurrency_name not in self.coordinator.data
+            or self.cryptocurrency_id not in self.coordinator.data
         ):
             return {
                 ATTR_LAST_UPDATE: datetime.today().strftime("%d-%m-%Y %H:%M"),
+                ATTR_CRYPTOCURRENCY_NAME: None,
+                ATTR_CURRENCY_NAME: None,
                 ATTR_BASE_PRICE: None,
                 ATTR_MULTIPLIER: None,
                 ATTR_24H_VOLUME: None,
@@ -313,9 +318,13 @@ class CryptoinfoSensor(CoordinatorEntity):
                 ATTR_TOTAL_SUPPLY: None,
             }
 
-        data = self.coordinator.data[self.cryptocurrency_name]
+        data = self.coordinator.data[self.cryptocurrency_id]
         return {
             ATTR_LAST_UPDATE: datetime.today().strftime("%d-%m-%Y %H:%M"),
+            ATTR_CRYPTOCURRENCY_ID: self.cryptocurrency_id,
+            ATTR_CRYPTOCURRENCY_NAME: data["name"],
+            ATTR_CRYPTOCURRENCY_SYMBOL: data["symbol"],
+            ATTR_CURRENCY_NAME: self.currency_name,
             ATTR_BASE_PRICE: data["current_price"],
             ATTR_MULTIPLIER: self.multiplier,
             ATTR_24H_VOLUME: data["total_volume"],
