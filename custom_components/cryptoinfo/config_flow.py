@@ -15,7 +15,7 @@ from .helper.crypto_info_data import CryptoInfoData
 
 from .const.const import (
     _LOGGER,
-    CONF_CRYPTOCURRENCY_NAMES,
+    CONF_CRYPTOCURRENCY_IDS,
     CONF_CURRENCY_NAME,
     CONF_ID,
     CONF_MIN_TIME_BETWEEN_REQUESTS,
@@ -29,9 +29,9 @@ PLACEHOLDERS = {
     "description_help": "For more information, see the <a href='https://github.com/heyajohnny/cryptoinfo' target='_blank'>documentation</a>.",
     "id_help": "Unique name for the sensor",
     "currency_name_help": "One of the currency names in <a href='https://api.coingecko.com/api/v3/simple/supported_vs_currencies' target='_blank'>this list</a>.",
-    "cryptocurrency_names_help": "The 'id' values from one or more of the coins/tokens in <a href='https://api.coingecko.com/api/v3/coins/list' target='_blank'>this list</a>. seperated by , characters",
+    "cryptocurrency_ids_help": "The 'id' values from one or more of the coins/tokens in <a href='https://api.coingecko.com/api/v3/coins/list' target='_blank'>this list</a>. seperated by , characters",
     "unit_of_measurement_help": "Do you want to use a currency symbol? (<a href='https://en.wikipedia.org/wiki/Currency_symbol#List_of_currency_symbols_currently_in_use' target='_blank'>Symbol list</a>)",
-    "multipliers_help": "The number of coins/tokens (seperated by a , character). The number of Multipliers must match the number of Cryptocurrency names",
+    "multipliers_help": "The number of coins/tokens (seperated by a , character). The number of Multipliers must match the number of Cryptocurrency id's",
     "update_frequency_help": "How often should the value be refreshed? Beware of the <a href='https://support.coingecko.com/hc/en-us/articles/4538771776153-What-is-the-rate-limit-for-CoinGecko-API-public-plan' target='_blank'>CoinGecko rate limit</a> when tracking multiple cryptocurrencies.",
     "min_time_between_requests_help": "The minimum time between the other entities and this entity to make a data request to the API. (This property is shared and the same for every entity)",
 }
@@ -45,17 +45,17 @@ class CryptoInfoConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         errors = {}
 
         # Split and clean the values
-        crypto_names = [
-            name.strip() for name in user_input[CONF_CRYPTOCURRENCY_NAMES].split(",")
+        crypto_ids = [
+            name.strip() for name in user_input[CONF_CRYPTOCURRENCY_IDS].split(",")
         ]
         multipliers = [mult.strip() for mult in user_input[CONF_MULTIPLIERS].split(",")]
 
         # Check if the counts match
-        if len(crypto_names) != len(multipliers):
+        if len(crypto_ids) != len(multipliers):
             return {
                 "base": "mismatch_values",
                 "count_context": {
-                    "crypto_count": len(crypto_names),
+                    "crypto_count": len(crypto_ids),
                     "multiplier_count": len(multipliers),
                 },
             }
@@ -116,8 +116,8 @@ class CryptoInfoConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             {
                 vol.Optional(CONF_ID, default=entry_data[CONF_ID]): str,
                 vol.Required(
-                    CONF_CRYPTOCURRENCY_NAMES,
-                    default=entry_data[CONF_CRYPTOCURRENCY_NAMES],
+                    CONF_CRYPTOCURRENCY_IDS,
+                    default=entry_data[CONF_CRYPTOCURRENCY_IDS],
                 ): str,
                 vol.Required(
                     CONF_CURRENCY_NAME, default=entry_data[CONF_CURRENCY_NAME]
@@ -162,7 +162,7 @@ class CryptoInfoConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         # Use user_input values as defaults if they exist, otherwise use the original defaults
         defaults = {
             CONF_ID: "Main btc stash",
-            CONF_CRYPTOCURRENCY_NAMES: "bitcoin, ethereum",
+            CONF_CRYPTOCURRENCY_IDS: "bitcoin, ethereum",
             CONF_MULTIPLIERS: "1, 32",
             CONF_CURRENCY_NAME: "usd",
             CONF_UNIT_OF_MEASUREMENT: "$",
@@ -178,8 +178,8 @@ class CryptoInfoConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             {
                 vol.Optional(CONF_ID, default=defaults[CONF_ID]): str,
                 vol.Required(
-                    CONF_CRYPTOCURRENCY_NAMES,
-                    default=defaults[CONF_CRYPTOCURRENCY_NAMES],
+                    CONF_CRYPTOCURRENCY_IDS,
+                    default=defaults[CONF_CRYPTOCURRENCY_IDS],
                 ): str,
                 vol.Required(CONF_MULTIPLIERS, default=defaults[CONF_MULTIPLIERS]): str,
                 vol.Required(

@@ -39,27 +39,35 @@ The next step is to add cryptoinfo sensors to your Home Assistant:
 ![image](https://github.com/user-attachments/assets/8ad3d15c-78ce-4c0a-892c-f0a967595f9d)
 
 ### Properties
+```
 - Identifier                                Unique name for the sensor
-- Cryptocurrency names                      One or more of the 'id' values (seperated by a , character) that you can find on this <a href='https://api.coingecko.com/api/v3/coins/list' target='_blank'>page</a>
-- Multipliers                               The number of coins/tokens (seperated by a , character). The number of Multipliers must match the number of Cryptocurrency names
+- Cryptocurrency id's                       One or more of the 'id' values (seperated by a , character) that you can find on this <a href='https://api.coingecko.com/api/v3/coins/list' target='_blank'>page</a>
+- Multipliers                               The number of coins/tokens (seperated by a , character). The number of Multipliers must match the number of Cryptocurrency id's
 - Currency name                             One of the currency names that you can find on this <a href='https://api.coingecko.com/api/v3/simple/supported_vs_currencies' target='_blank'>page</a>
 - Unit of measurement                       You can use a currency symbol or you can make it empty. You can find some symbols on this <a href='https://en.wikipedia.org/wiki/Currency_symbol#List_of_currency_symbols_currently_in_use' target='_blank'>page</a>
 - Update frequency (minutes)                How often should the value be refreshed? Beware of the <a href='https://support.coingecko.com/hc/en-us/articles/4538771776153-What-is-the-rate-limit-for-CoinGecko-API-public-plan' target='_blank'>CoinGecko rate limit</a> when using multiple sensors
 - Minimum time between requests (minutes)   The minimum time between the other sensors and this sensor to make a data request to the API. (This property is shared and the same for every sensor). You can set this value to 0 if you only use 1 sensor
+```
 
 ### Attributes
 The entities have some important attributes:
-- last_update         This will return the date and time of the last update
-- base_price          This will return the price of 1 coin / token in 'currency_name'(default = "usd") of the 'cryptocurrency_name'
-- multiplier          This will return the number of coins / tokens
-- 24h_volume          This will return the 24 hour volume in 'currency_name'(default = "usd") of the 'cryptocurrency_name'(default = "bitcoin")
-- 1h_change           This will return the 1 hour change in percentage of the 'cryptocurrency_name'(default = "bitcoin")
-- 24h_change          This will return the 24 hour change in percentage of the 'cryptocurrency_name'(default = "bitcoin")
-- 7d_change           This will return the 7 day change in percentage of the 'cryptocurrency_name'(default = "bitcoin")
-- 30d_change          This will return the 30 day change in percentage of the 'cryptocurrency_name'(default = "bitcoin")
-- market_cap          This will return the total market cap of the 'cryptocurrency_name'(default = "bitcoin") displayed in 'currency_name'(default = "usd")
-- circulating_supply  This will return the circulating supply of the 'cryptocurrency_name'(default = "bitcoin")
-- total_supply        This will return the total supply of the 'cryptocurrency_name'(default = "bitcoin")
+```
+- last_update           This will return the date and time of the last update
+- cryptocurrency_id     This will return the cryptocurrency id
+- cryptocurrency_name   This will return the cryptocurrency name
+- cryptocurrency_symbol This will return the cryptocurrency symbol
+- currency_name         This will return the currency name
+- base_price            This will return the price of 1 coin / token in 'currency_name'(default = "usd") of the 'cryptocurrency_id'
+- multiplier            This will return the number of coins / tokens
+- 24h_volume            This will return the 24 hour volume in 'currency_name'(default = "usd") of the 'cryptocurrency_id'(default = "bitcoin")
+- 1h_change             This will return the 1 hour change in percentage of the 'cryptocurrency_id'(default = "bitcoin")
+- 24h_change            This will return the 24 hour change in percentage of the 'cryptocurrency_id'(default = "bitcoin")
+- 7d_change             This will return the 7 day change in percentage of the 'cryptocurrency_id'(default = "bitcoin")
+- 30d_change            This will return the 30 day change in percentage of the 'cryptocurrency_id'(default = "bitcoin")
+- market_cap            This will return the total market cap of the 'cryptocurrency_id'(default = "bitcoin") displayed in 'currency_name'(default = "usd")
+- circulating_supply    This will return the circulating supply of the 'cryptocurrency_id'(default = "bitcoin")
+- total_supply          This will return the total supply of the 'cryptocurrency_id'(default = "bitcoin")
+```
 
 Template example for usage of attributes.
 This example creates a new sensor with the attribute value '24h_volume' of the sensor 'sensor.cryptoinfo_main_wallet_ethereum_eur':
