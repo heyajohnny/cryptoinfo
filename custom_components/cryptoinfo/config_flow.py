@@ -40,7 +40,7 @@ PLACEHOLDERS = {
 class CryptoInfoConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     VERSION = 1
 
-    def _validate_input(self, user_input: dict[str, Any]) -> dict[str, str]:
+    def _validate_input(self, user_input: dict[str, Any]) -> dict[str, Any]:
         """Validate the input."""
         errors = {}
 
@@ -66,6 +66,15 @@ class CryptoInfoConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         entry = self.hass.config_entries.async_get_entry(self.context["entry_id"])
         assert entry
         if user_input:
+            # Convert Mapping to dict to make it mutable
+            user_input = dict(user_input)
+
+            # Ensure empty strings are preserved for these optional properties
+            if CONF_ID not in user_input:
+                user_input[CONF_ID] = ""
+            if CONF_UNIT_OF_MEASUREMENT not in user_input:
+                user_input[CONF_UNIT_OF_MEASUREMENT] = ""
+
             # Validate the input
             validation_result = self._validate_input(user_input)
             if validation_result:
@@ -99,8 +108,8 @@ class CryptoInfoConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     async def _redo_configuration(
         self,
         entry_data: Mapping[str, Any],
-        errors: dict = None,
-        count_context: dict = None,
+        errors: dict[str, Any] | None = None,
+        count_context: dict[str, Any] | None = None,
     ):
         if errors is None:
             errors = {}
@@ -114,7 +123,10 @@ class CryptoInfoConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         cryptoinfo_schema = vol.Schema(
             {
-                vol.Optional(CONF_ID, default=entry_data[CONF_ID]): str,
+                vol.Optional(
+                    CONF_ID,
+                    description={"suggested_value": entry_data.get(CONF_ID, "")},
+                ): str,
                 vol.Required(
                     CONF_CRYPTOCURRENCY_IDS,
                     default=entry_data[CONF_CRYPTOCURRENCY_IDS],
@@ -127,14 +139,16 @@ class CryptoInfoConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 ): str,
                 vol.Optional(
                     CONF_UNIT_OF_MEASUREMENT,
-                    default=entry_data[CONF_UNIT_OF_MEASUREMENT],
+                    description={
+                        "suggested_value": entry_data.get(CONF_UNIT_OF_MEASUREMENT, "")
+                    },
                 ): str,
                 vol.Required(
                     CONF_UPDATE_FREQUENCY, default=entry_data[CONF_UPDATE_FREQUENCY]
                 ): cv.positive_float,
                 vol.Required(
                     CONF_MIN_TIME_BETWEEN_REQUESTS,
-                    default=default_min_time,
+                    description={"suggested_value": default_min_time},
                 ): cv.positive_float,
             }
         )
@@ -176,7 +190,10 @@ class CryptoInfoConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         cryptoinfo_schema = vol.Schema(
             {
-                vol.Optional(CONF_ID, default=defaults[CONF_ID]): str,
+                vol.Optional(
+                    CONF_ID,
+                    description={"suggested_value": defaults.get(CONF_ID, "")},
+                ): str,
                 vol.Required(
                     CONF_CRYPTOCURRENCY_IDS,
                     default=defaults[CONF_CRYPTOCURRENCY_IDS],
@@ -186,7 +203,10 @@ class CryptoInfoConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     CONF_CURRENCY_NAME, default=defaults[CONF_CURRENCY_NAME]
                 ): str,
                 vol.Optional(
-                    CONF_UNIT_OF_MEASUREMENT, default=defaults[CONF_UNIT_OF_MEASUREMENT]
+                    CONF_UNIT_OF_MEASUREMENT,
+                    description={
+                        "suggested_value": defaults.get(CONF_UNIT_OF_MEASUREMENT, "")
+                    },
                 ): str,
                 vol.Required(
                     CONF_UPDATE_FREQUENCY, default=defaults[CONF_UPDATE_FREQUENCY]

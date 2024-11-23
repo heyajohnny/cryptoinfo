@@ -55,10 +55,10 @@ async def async_setup_entry(
 
     config = config_entry.data
 
-    id_name = config.get(CONF_ID)
+    id_name = (config.get(CONF_ID) or "").strip()
     cryptocurrency_ids = config.get(CONF_CRYPTOCURRENCY_IDS).lower().strip()
     currency_name = config.get(CONF_CURRENCY_NAME).strip()
-    unit_of_measurement = config.get(CONF_UNIT_OF_MEASUREMENT).strip()
+    unit_of_measurement = (config.get(CONF_UNIT_OF_MEASUREMENT) or "").strip()
     multipliers = config.get(CONF_MULTIPLIERS).strip()
     update_frequency = timedelta(minutes=(float(config.get(CONF_UPDATE_FREQUENCY))))
     min_time_between_requests = timedelta(
