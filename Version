@@ -19,3 +19,4 @@ Version: 0.1.7 20230330 - Better exception
 Version: 1.0.0 20241119 - Complete refactor
 Version: 1.0.1 20241120 - Updated hacs.json + removed multiplier from identifier
 Version: 1.0.2 20241121 - Added cryptocurrency_id, cryptocurrency_name, cryptocurrency_symbol and currency_name to attributes
+Version: 1.0.3 20241123 - Fix for empty id and unit_of_measurement
