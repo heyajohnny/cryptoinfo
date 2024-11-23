@@ -80,17 +80,21 @@ This example creates a new sensor with the attribute value '24h_volume' of the s
 ```
 
 If you want to know the total value of your cryptocurrencies, you could use this template as an example.
-This example combines the total value of 3 sensors into this 1 template sensor:
+This example combines the total value of all your sensors into this 1 template sensor:
 ```yaml
   - platform: template
     sensors:
       crypto_total:
-        value_template: "{{
-          ( states('sensor.cryptoinfo_main_wallet_ethereum_eur') | float(0) | round(2)) +
-          ( states('sensor.cryptoinfo_bitcoin_eur') | float(0) | round(2)) +
-          ( states('sensor.cryptoinfo_cardano_eur') | float(0) | round(2))
-          }}"
-        unit_of_measurement: '€'
+        value_template: >
+          {{ integration_entities('cryptoinfo')
+              | map('states')
+              | map('float', 0)
+              | sum | round(2) }}
+        unit_of_measurement: >
+          {{ expand(integration_entities('cryptoinfo'))
+              | map(attribute='attributes.unit_of_measurement')
+              | list | default(['$'], true)
+              | first }}
         friendly_name: Total value of all my cryptocurrencies
 ```
 
