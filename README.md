@@ -36,7 +36,7 @@ The next step is to add cryptoinfo sensors to your Home Assistant:
 
 4. Fill in the 'add new sensor' form
 
-![image](https://github.com/user-attachments/assets/8ad3d15c-78ce-4c0a-892c-f0a967595f9d)
+![image](https://github.com/user-attachments/assets/d76156df-dc2c-4f5f-bbdf-ea58570c5963)
 
 ### Properties
 ```
