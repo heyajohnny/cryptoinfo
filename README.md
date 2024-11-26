@@ -1,5 +1,7 @@
 ## Home Assistant sensor component for cryptocurrencies
 [![hacs_badge](https://img.shields.io/badge/HACS-Default-orange.svg)](https://github.com/hacs/integration)
+
+![icon_mini](https://github.com/user-attachments/assets/328f93d8-6ea7-4877-bc31-1c5b33c4583a)
 ### Powered by CoinGecko API
 
 #### Provides Home Assistant sensors for all cryptocurrencies supported by CoinGecko
