@@ -41,7 +41,7 @@ The next step is to add cryptoinfo sensors to your Home Assistant:
 ![image](https://github.com/user-attachments/assets/d76156df-dc2c-4f5f-bbdf-ea58570c5963)
 
 ### Properties
-```
+<pre>
 - Identifier                                Unique name for the sensor
 - Cryptocurrency id's                       One or more of the 'id' values (seperated by a , character) that you can find on this <a href='https://api.coingecko.com/api/v3/coins/list' target='_blank'>page</a>
 - Multipliers                               The number of coins/tokens (seperated by a , character). The number of Multipliers must match the number of Cryptocurrency id's
@@ -49,7 +49,7 @@ The next step is to add cryptoinfo sensors to your Home Assistant:
 - Unit of measurement                       You can use a currency symbol or you can make it empty. You can find some symbols on this <a href='https://en.wikipedia.org/wiki/Currency_symbol#List_of_currency_symbols_currently_in_use' target='_blank'>page</a>
 - Update frequency (minutes)                How often should the value be refreshed? Beware of the <a href='https://support.coingecko.com/hc/en-us/articles/4538771776153-What-is-the-rate-limit-for-CoinGecko-API-public-plan' target='_blank'>CoinGecko rate limit</a> when using multiple sensors
 - Minimum time between requests (minutes)   The minimum time between the other sensors and this sensor to make a data request to the API. (This property is shared and the same for every sensor). You can set this value to 0 if you only use 1 sensor
-```
+</pre>
 
 ### Attributes
 The entities have some important attributes:
