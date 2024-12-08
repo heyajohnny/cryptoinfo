@@ -25,17 +25,6 @@ from .const.const import (
     DOMAIN,
 )
 
-PLACEHOLDERS = {
-    "description_help": "For more information, see the <a href='https://github.com/heyajohnny/cryptoinfo' target='_blank'>documentation</a>.",
-    "id_help": "Unique name for the sensor",
-    "currency_name_help": "One of the currency names in <a href='https://api.coingecko.com/api/v3/simple/supported_vs_currencies' target='_blank'>this list</a>.",
-    "cryptocurrency_ids_help": "The 'id' values from one or more of the coins/tokens in <a href='https://api.coingecko.com/api/v3/coins/list' target='_blank'>this list</a>. seperated by , characters",
-    "unit_of_measurement_help": "Do you want to use a currency symbol? (<a href='https://en.wikipedia.org/wiki/Currency_symbol#List_of_currency_symbols_currently_in_use' target='_blank'>Symbol list</a>)",
-    "multipliers_help": "The number of coins/tokens (seperated by a , character). The number of Multipliers must match the number of Cryptocurrency id's",
-    "update_frequency_help": "How often should the value be refreshed? Beware of the <a href='https://support.coingecko.com/hc/en-us/articles/4538771776153-What-is-the-rate-limit-for-CoinGecko-API-public-plan' target='_blank'>CoinGecko rate limit</a> when tracking multiple cryptocurrencies.",
-    "min_time_between_requests_help": "The minimum time between the other entities and this entity to make a data request to the API. (This property is shared and the same for every entity)",
-}
-
 
 class CryptoInfoConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     VERSION = 1
@@ -157,7 +146,7 @@ class CryptoInfoConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             step_id="reconfigure",
             data_schema=cryptoinfo_schema,
             errors=errors,
-            description_placeholders={**PLACEHOLDERS, **count_context},
+            description_placeholders={**count_context},
         )
 
     async def async_step_user(self, user_input: dict[str, Any] | None = None):
@@ -220,10 +209,7 @@ class CryptoInfoConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         if user_input is None:
             return self.async_show_form(
-                step_id="user",
-                data_schema=cryptoinfo_schema,
-                errors=errors,
-                description_placeholders=PLACEHOLDERS,
+                step_id="user", data_schema=cryptoinfo_schema, errors=errors
             )
 
         try:
@@ -235,7 +221,7 @@ class CryptoInfoConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     step_id="user",
                     data_schema=cryptoinfo_schema,
                     errors=validation_result,
-                    description_placeholders={**PLACEHOLDERS, **count_context},
+                    description_placeholders={**count_context},
                 )
 
             await self.async_set_unique_id(user_input[CONF_ID])
@@ -255,8 +241,5 @@ class CryptoInfoConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             _LOGGER.error(f"Error creating entry: {ex}")
             errors["base"] = f"Error creating entry: {ex}"
             return self.async_show_form(
-                step_id="user",
-                data_schema=cryptoinfo_schema,
-                errors=errors,
-                description_placeholders=PLACEHOLDERS,
+                step_id="user", data_schema=cryptoinfo_schema, errors=errors
             )

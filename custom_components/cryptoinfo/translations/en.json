@@ -3,7 +3,7 @@
         "step": {
             "user": {
                 "title": "Add new sensor",
-                "description": "{description_help}",
+                "description": "For more information, see the [documentation](https://github.com/heyajohnny/cryptoinfo).",
                 "data": {
                     "id": "Identifier",
                     "cryptocurrency_ids": "Cryptocurrency id's",
@@ -14,18 +14,18 @@
                     "min_time_between_requests": "Minimum time between requests (minutes)"
                 },
                 "data_description": {
-                    "id": "{id_help}",
-                    "currency_name": "{currency_name_help}",
-                    "cryptocurrency_ids": "{cryptocurrency_ids_help}",
-                    "unit_of_measurement": "{unit_of_measurement_help}",
-                    "multipliers": "{multipliers_help}",
-                    "update_frequency": "{update_frequency_help}",
-                    "min_time_between_requests": "{min_time_between_requests_help}"
+                    "id": "Unique name for the sensor.",
+                    "currency_name": "One of the currency names in [this list](https://api.coingecko.com/api/v3/simple/supported_vs_currencies).",
+                    "cryptocurrency_ids": "The 'id' values from one or more of the coins/tokens in [this list](https://api.coingecko.com/api/v3/coins/list), separated by commas.",
+                    "unit_of_measurement": "Do you want to use a currency symbol? ([Symbol list](https://en.wikipedia.org/wiki/Currency_symbol#List_of_currency_symbols_currently_in_use))",
+                    "multipliers": "The number of coins/tokens (separated by a comma). The number of multipliers must match the number of cryptocurrency IDs.",
+                    "update_frequency": "How often should the value be refreshed? Beware of the [CoinGecko rate limit](https://support.coingecko.com/hc/en-us/articles/4538771776153-What-is-the-rate-limit-for-CoinGecko-API-public-plan) when tracking multiple cryptocurrencies.",
+                    "min_time_between_requests": "The minimum time between the other entities and this entity to make a data request to the API. (This property is shared and the same for every entity.)"
                 }
             },
             "reconfigure": {
                 "title": "Update existing sensor",
-                "description": "{description_help}",
+                "description": "For more information, see the [documentation](https://github.com/heyajohnny/cryptoinfo).",
                 "data": {
                     "id": "Identifier",
                     "cryptocurrency_ids": "Cryptocurrency id's",
@@ -36,13 +36,13 @@
                     "min_time_between_requests": "Minimum time between requests (minutes)"
                 },
                 "data_description": {
-                    "id": "{id_help}",
-                    "currency_name": "{currency_name_help}",
-                    "cryptocurrency_ids": "{cryptocurrency_ids_help}",
-                    "unit_of_measurement": "{unit_of_measurement_help}",
-                    "multipliers": "{multipliers_help}",
-                    "update_frequency": "{update_frequency_help}",
-                    "min_time_between_requests": "{min_time_between_requests_help}"
+                    "id": "Unique name for the sensor.",
+                    "currency_name": "One of the currency names in [this list](https://api.coingecko.com/api/v3/simple/supported_vs_currencies).",
+                    "cryptocurrency_ids": "The 'id' values from one or more of the coins/tokens in [this list](https://api.coingecko.com/api/v3/coins/list), separated by commas.",
+                    "unit_of_measurement": "Do you want to use a currency symbol? ([Symbol list](https://en.wikipedia.org/wiki/Currency_symbol#List_of_currency_symbols_currently_in_use))",
+                    "multipliers": "The number of coins/tokens (separated by a comma). The number of multipliers must match the number of cryptocurrency IDs.",
+                    "update_frequency": "How often should the value be refreshed? Beware of the [CoinGecko rate limit](https://support.coingecko.com/hc/en-us/articles/4538771776153-What-is-the-rate-limit-for-CoinGecko-API-public-plan) when tracking multiple cryptocurrencies.",
+                    "min_time_between_requests": "The minimum time between the other entities and this entity to make a data request to the API. (This property is shared and the same for every entity.)"
                 }
             }
         },
@@ -54,15 +54,5 @@
             "cannot_connect": "Error: Cannot connect",
             "mismatch_values": "The number of cryptocurrency id's ({crypto_count}) does not match the number of multipliers ({multiplier_count})"
         }
-    },
-    "description_placeholders": {
-        "description_help": "For more information, see the <a href='https://github.com/heyajohnny/cryptoinfo' target='_blank'>documentation</a>.",
-        "id_help": "Unique name for the sensor",
-        "currency_name_help": "One of the currency names in <a href='https://api.coingecko.com/api/v3/simple/supported_vs_currencies' target='_blank'>this list</a>.",
-        "cryptocurrency_ids_help": "The 'id' values from one or more of the coins/tokens in <a href='https://api.coingecko.com/api/v3/coins/list' target='_blank'>this list</a>. seperated by , characters",
-        "unit_of_measurement_help": "Do you want to use a currency symbol? (<a href='https://en.wikipedia.org/wiki/Currency_symbol#List_of_currency_symbols_currently_in_use' target='_blank'>Symbol list</a>)",
-        "multipliers_help": " The number of coins / tokens (seperated by a , character). The number of Multipliers must match the number of Cryptocurrency id's",
-        "update_frequency_help": "How often should the value be refreshed? Beware of the <a href='https://support.coingecko.com/hc/en-us/articles/4538771776153-What-is-the-rate-limit-for-CoinGecko-API-public-plan' target='_blank'>CoinGecko rate limit</a> when tracking multiple cryptocurrencies.",
-        "min_time_between_requests_help": "The minimum time between the other entities and this entity to make a data request to the API. (This property is shared and the same for every entity)"
     }
 }
