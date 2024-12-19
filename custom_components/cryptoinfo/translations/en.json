@@ -47,7 +47,7 @@
             }
         },
         "abort": {
-            "already_configured": "This sensor already exists",
+            "already_configured": "A sensor with this name (Identifier) already exists",
             "reconfigure_successful": "Re-configuration was successful"
         },
         "error": {
