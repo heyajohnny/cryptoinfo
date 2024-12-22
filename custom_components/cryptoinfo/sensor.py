@@ -22,9 +22,11 @@ from .const.const import (
     API_ENDPOINT,
     ATTR_1H_CHANGE,
     ATTR_7D_CHANGE,
+    ATTR_14D_CHANGE,
     ATTR_24H_CHANGE,
     ATTR_24H_VOLUME,
     ATTR_30D_CHANGE,
+    ATTR_1Y_CHANGE,
     ATTR_BASE_PRICE,
     ATTR_CIRCULATING_SUPPLY,
     ATTR_LAST_UPDATE,
@@ -167,7 +169,7 @@ class CryptoDataCoordinator(DataUpdateCoordinator):
                 f"{API_ENDPOINT}coins/markets"
                 f"?ids={self.cryptocurrency_ids}"
                 f"&vs_currency={self.currency_name}"
-                f"&price_change_percentage=1h%2C24h%2C7d%2C30d"
+                f"&price_change_percentage=1h%2C24h%2C7d%2C14d%2C30d%2C1y"
             )
 
             try:
@@ -223,7 +225,7 @@ class CryptoDataCoordinator(DataUpdateCoordinator):
             f"{API_ENDPOINT}coins/markets"
             f"?ids={self.cryptocurrency_ids}"
             f"&vs_currency={self.currency_name}"
-            f"&price_change_percentage=1h%2C24h%2C7d%2C30d"
+            f"&price_change_percentage=1h%2C24h%2C7d%2C14d%2C30d%2C1y"
         )
 
         try:
@@ -312,7 +314,9 @@ class CryptoinfoSensor(CoordinatorEntity):
                 ATTR_1H_CHANGE: None,
                 ATTR_24H_CHANGE: None,
                 ATTR_7D_CHANGE: None,
+                ATTR_14D_CHANGE: None,
                 ATTR_30D_CHANGE: None,
+                ATTR_1Y_CHANGE: None,
                 ATTR_MARKET_CAP: None,
                 ATTR_CIRCULATING_SUPPLY: None,
                 ATTR_TOTAL_SUPPLY: None,
@@ -331,7 +335,9 @@ class CryptoinfoSensor(CoordinatorEntity):
             ATTR_1H_CHANGE: data["price_change_percentage_1h_in_currency"],
             ATTR_24H_CHANGE: data["price_change_percentage_24h_in_currency"],
             ATTR_7D_CHANGE: data["price_change_percentage_7d_in_currency"],
+            ATTR_14D_CHANGE: data["price_change_percentage_14d_in_currency"],
             ATTR_30D_CHANGE: data["price_change_percentage_30d_in_currency"],
+            ATTR_1Y_CHANGE: data["price_change_percentage_1y_in_currency"],
             ATTR_MARKET_CAP: data["market_cap"],
             ATTR_CIRCULATING_SUPPLY: data["circulating_supply"],
             ATTR_TOTAL_SUPPLY: data["total_supply"],
