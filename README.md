@@ -71,9 +71,9 @@ The entities have some important attributes:
 - market_cap            This will return the total market cap of the 'cryptocurrency_id'(default = "bitcoin") displayed in 'currency_name'(default = "usd")
 - circulating_supply    This will return the circulating supply of the 'cryptocurrency_id'(default = "bitcoin")
 - total_supply          This will return the total supply of the 'cryptocurrency_id'(default = "bitcoin")
-- ath_price             This will return the All Time High Price of the ''currency_name'(default = "usd") of the 'cryptocurrency_id'(default = "bitcoin")'
-- ath_date              This will return the date when the All Time High was reached of the ''currency_name'(default = "usd") of the 'cryptocurrency_id'(default = "bitcoin")'
-- ath_change            This will return the percentage change from the All Time High of the ''currency_name'(default = "usd") of the 'cryptocurrency_id'(default = "bitcoin")'
+- ath_price             This will return the All Time High Price of the 'currency_name'(default = "usd") of the 'cryptocurrency_id'(default = "bitcoin")
+- ath_date              This will return the date when the All Time High was reached of the 'currency_name'(default = "usd") of the 'cryptocurrency_id'(default = "bitcoin")
+- ath_change            This will return the percentage change from the All Time High of the 'currency_name'(default = "usd") of the 'cryptocurrency_id'(default = "bitcoin")
 ```
 
 Template example for usage of attributes.

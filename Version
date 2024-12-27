@@ -23,3 +23,4 @@ Version: 1.0.3 20241123 - Fix for empty id and unit_of_measurement
 Version: 1.0.4 20241208 - Adjusted some translations
 Version: 1.0.5 20241219 - Updated help text
 Version: 1.0.6 20241222 - Added 14 day change and 1 year change
+Version: 1.0.7 20241227 - Added ath_price, ath_date and ath_change
