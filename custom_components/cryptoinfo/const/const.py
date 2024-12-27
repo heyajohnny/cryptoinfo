@@ -28,6 +28,9 @@ ATTR_1Y_CHANGE = "1y_change"
 ATTR_MARKET_CAP = "market_cap"
 ATTR_CIRCULATING_SUPPLY = "circulating_supply"
 ATTR_TOTAL_SUPPLY = "total_supply"
+ATTR_ATH = "ath"
+ATTR_ATH_DATE = "ath_date"
+ATTR_ATH_CHANGE = "ath_change"
 
 API_ENDPOINT = "https://api.coingecko.com/api/v3/"
 
