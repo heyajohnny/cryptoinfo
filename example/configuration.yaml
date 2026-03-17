@@ -1,24 +1,27 @@
-sensor:
-  - platform: cryptoinfo
-    id: "main wallet"
-    cryptocurrency_name: "ethereum"
-    currency_name: "eur"
-    unit_of_measurement: "€"
-    multiplier: 1.5
-    update_frequency: 1
-
-  - platform: template
-    sensors:
-      cryptoinfo_main_wallet_ethereum_eur_24h_volume:
-        value_template: "{{ state_attr('sensor.cryptoinfo_main_wallet_ethereum_eur', 'volume') | round(0) }}"
+template:
+  - sensor:
+      - name: 24h volume (main wallet ETH)
+        state: "{{ state_attr('sensor.cryptoinfo_main_wallet_ethereum_eur', '24h_volume') | float(0) | round(0) }}"
         unit_of_measurement: "€"
 
-  - platform: template
-    sensors:
-      crypto_bitcoin_owned:
-        friendly_name: "Bitcoin Owned"
-        unit_of_measurement: '$'
-        value_template: >-
+      - name: Bitcoin owned
+        state: >-
           {% if not is_state('sensor.cryptoinfo_bitcoin_usd', 'unknown') %}
-            {{ (states('sensor.cryptoinfo_bitcoin_usd')|float *0.12345) | round(2) }}
-          {%endif %}
+            {{ (states('sensor.cryptoinfo_bitcoin_usd') | float(0) * 0.12345) | round(2) }}
+          {% endif %}
+        unit_of_measurement: "$"
+
+      - name: Total my crypto
+        unique_id: crypto_total
+        state: >
+          {{ integration_entities('cryptoinfo')
+             | map('states')
+             | map('float', 0)
+             | sum
+             | round(2) }}
+        unit_of_measurement: >
+          {{ expand(integration_entities('cryptoinfo'))
+             | map(attribute='attributes.unit_of_measurement')
+             | list
+             | default(['$'], true)
+             | first }}

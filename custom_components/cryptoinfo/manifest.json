@@ -1,14 +1,12 @@
 {
   "domain": "cryptoinfo",
   "name": "Cryptoinfo",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "config_flow": true,
   "iot_class": "cloud_polling",
   "documentation": "https://github.com/heyajohnny/cryptoinfo",
   "issue_tracker": "https://github.com/heyajohnny/cryptoinfo/issues",
   "dependencies": [],
-  "codeowners": [
-    "@heyajohnny"
-  ],
+  "codeowners": ["@heyajohnny"],
   "requirements": []
 }

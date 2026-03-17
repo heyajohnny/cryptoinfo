@@ -11,7 +11,7 @@ Version: 0.0.10 20220126 - Added device class attribute 'monetary'
 Version: 0.1.0 20220821 - Added 1h, 24h, 7d, 30d volume + circulating and total supply attributes
 Version: 0.1.1 20220903 - Removed unit of measurement, because it isn't needed anymore in the current HA versions
 Version: 0.1.2 20220906 - Added state_class instead of the unit_of_measurement
-Version: 0.1.3 20220906 - Readded the unit_of_measurement with the value of ""
+Version: 0.1.3 20220906 - Re-added the unit_of_measurement with the value of ""
 Version: 0.1.4 20220906 - Made the unit_of_measurement configurable with a default value of "$"
 Version: 0.1.5 20230323 - Use floating point precision for the update interval
 Version: 0.1.6 20230323 - Use floating point precision for the update interval (typo fix)
@@ -24,3 +24,4 @@ Version: 1.0.4 20241208 - Adjusted some translations
 Version: 1.0.5 20241219 - Updated help text
 Version: 1.0.6 20241222 - Added 14 day change and 1 year change
 Version: 1.0.7 20241227 - Added ath_price, ath_date and ath_change
+Version: 1.0.8 20260317 - Updated code to support future Home Assistant versions

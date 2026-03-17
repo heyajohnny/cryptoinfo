@@ -1,14 +1,17 @@
 #!/usr/bin/env python3
-"""
-Sensor component for Cryptoinfo
+"""Sensor component for Cryptoinfo.
+
 Author: Johnny Visser
 """
 
-import urllib.error
 from datetime import datetime, timedelta
+import urllib.error
+
+from aiohttp import ClientError
 
 from homeassistant import config_entries
-from homeassistant.components.sensor.const import SensorDeviceClass
+from homeassistant.components.sensor import SensorEntity
+from homeassistant.components.sensor.const import SensorDeviceClass, SensorStateClass
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import aiohttp_client
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -21,27 +24,27 @@ from .const.const import (
     _LOGGER,
     API_ENDPOINT,
     ATTR_1H_CHANGE,
+    ATTR_1Y_CHANGE,
     ATTR_7D_CHANGE,
     ATTR_14D_CHANGE,
     ATTR_24H_CHANGE,
     ATTR_24H_VOLUME,
     ATTR_30D_CHANGE,
-    ATTR_1Y_CHANGE,
+    ATTR_ATH,
+    ATTR_ATH_CHANGE,
+    ATTR_ATH_DATE,
     ATTR_BASE_PRICE,
     ATTR_CIRCULATING_SUPPLY,
-    ATTR_LAST_UPDATE,
     ATTR_CRYPTOCURRENCY_ID,
     ATTR_CRYPTOCURRENCY_NAME,
     ATTR_CRYPTOCURRENCY_SYMBOL,
     ATTR_CURRENCY_NAME,
+    ATTR_IMAGE,
+    ATTR_LAST_UPDATE,
     ATTR_MARKET_CAP,
     ATTR_MULTIPLIER,
-    ATTR_TOTAL_SUPPLY,
-    ATTR_ATH,
-    ATTR_ATH_DATE,
-    ATTR_ATH_CHANGE,
     ATTR_RANK,
-    ATTR_IMAGE,
+    ATTR_TOTAL_SUPPLY,
     CONF_CRYPTOCURRENCY_IDS,
     CONF_CURRENCY_NAME,
     CONF_ID,
@@ -58,6 +61,7 @@ async def async_setup_entry(
     config_entry: config_entries.ConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
+    """Set up Cryptoinfo sensors from a config entry."""
     _LOGGER.debug("Setup Cryptoinfo sensor")
 
     config = config_entry.data
@@ -96,7 +100,7 @@ async def async_setup_entry(
         _LOGGER.error(
             f"Length mismatch: multipliers ({multipliers_length}) and cryptocurrency id's ({crypto_list_length}) must have the same length"
         )
-        return False
+        return
 
     for i, cryptocurrency_id in enumerate(crypto_list):
         try:
@@ -112,12 +116,15 @@ async def async_setup_entry(
             )
         except urllib.error.HTTPError as error:
             _LOGGER.error(error.reason)
-            return False
+            return
 
     async_add_entities(entities)
+    return
 
 
 class CryptoDataCoordinator(DataUpdateCoordinator):
+    """Coordinator to fetch cryptocurrency data from CoinGecko."""
+
     _active_coordinators = set()  # Set to track active coordinator IDs
     _instance_count = 0  # Class variable to track number of coordinators
     _last_update_time = None
@@ -132,6 +139,7 @@ class CryptoDataCoordinator(DataUpdateCoordinator):
         min_time_between_requests: timedelta,
         id_name: str,
     ):
+        """Initialize the coordinator."""
         super().__init__(
             hass,
             _LOGGER,
@@ -183,8 +191,8 @@ class CryptoDataCoordinator(DataUpdateCoordinator):
                     response.raise_for_status()
                     data = await response.json()
                     return {coin["id"]: coin for coin in data}
-            except Exception as err:
-                _LOGGER.error(f"Error fetching data: {err}")
+            except (ClientError, TimeoutError, ValueError) as err:
+                _LOGGER.error("Error fetching data: %s", err)
                 return None
 
         time_since_last_request = current_time - CryptoDataCoordinator._last_update_time
@@ -197,7 +205,7 @@ class CryptoDataCoordinator(DataUpdateCoordinator):
                 f"Not enough time has passed {self.instance_id} {self.min_time_between_requests} "
                 f"waiting for time between requests {time_since_last_request} frequency:{self.update_frequency}"
             )
-            return self.data if self.data else None
+            return self.data or None
 
         # Find the next active coordinator ID
         last_id = CryptoDataCoordinator._last_updated_id
@@ -220,7 +228,7 @@ class CryptoDataCoordinator(DataUpdateCoordinator):
 
         if not should_update:
             _LOGGER.debug(f"Coordinator {self.instance_id} waiting for turn")
-            return self.data if self.data else None
+            return self.data or None
 
         _LOGGER.debug(
             f"Fetch data from API endpoint, sensor: {self.id_name} instance_id: {self.instance_id} cryptocurrency_ids: {self.cryptocurrency_ids}"
@@ -244,11 +252,14 @@ class CryptoDataCoordinator(DataUpdateCoordinator):
                 CryptoDataCoordinator._last_updated_id = self.instance_id
 
                 return {coin["id"]: coin for coin in data}
-        except Exception as err:
-            _LOGGER.error(f"Error fetching data: {err}")
+        except (ClientError, TimeoutError, ValueError) as err:
+            _LOGGER.error("Error fetching data: %s", err)
+            return self.data or None
 
 
-class CryptoinfoSensor(CoordinatorEntity):
+class CryptoinfoSensor(CoordinatorEntity[CryptoDataCoordinator], SensorEntity):
+    """Representation of a Cryptoinfo price sensor."""
+
     def __init__(
         self,
         coordinator: CryptoDataCoordinator,
@@ -258,22 +269,21 @@ class CryptoinfoSensor(CoordinatorEntity):
         multiplier: str,
         id_name: str,
     ):
+        """Initialize the sensor."""
         super().__init__(coordinator)
         self.cryptocurrency_id = cryptocurrency_id
         self.currency_name = currency_name
-        self._unit_of_measurement = unit_of_measurement
         self.multiplier = multiplier
         self._attr_device_class = SensorDeviceClass.MONETARY
-        self.entity_id = "sensor." + (
-            (SENSOR_PREFIX + (id_name + " " if len(id_name) > 0 else ""))
-            .lower()
-            .replace(" ", "_")
-            + cryptocurrency_id
-            + "_"
-            + currency_name
+        self._attr_state_class = SensorStateClass.MEASUREMENT
+        self._attr_native_unit_of_measurement = unit_of_measurement or None
+        # Let Home Assistant generate a valid entity ID (CoinGecko ids can contain '-')
+        self._attr_name = (
+            f"{SENSOR_PREFIX}{id_name} {cryptocurrency_id} {currency_name}"
+            if id_name
+            else f"{SENSOR_PREFIX}{cryptocurrency_id} {currency_name}"
         )
-        self._icon = "mdi:bitcoin"
-        self._state_class = "measurement"
+        self._attr_icon = "mdi:bitcoin"
         self._attr_unique_id = (
             SENSOR_PREFIX
             + (id_name + " " if len(id_name) > 0 else "")
@@ -282,20 +292,8 @@ class CryptoinfoSensor(CoordinatorEntity):
         )
 
     @property
-    def icon(self):
-        return self._icon
-
-    @property
-    def state_class(self):
-        return self._state_class
-
-    @property
-    def unit_of_measurement(self):
-        return self._unit_of_measurement
-
-    @property
-    def state(self):
-        """Return the state of the sensor."""
+    def native_value(self):
+        """Return the native value of the sensor."""
         if self.coordinator.data and self.cryptocurrency_id in self.coordinator.data:
             return float(
                 self.coordinator.data[self.cryptocurrency_id]["current_price"]
@@ -360,5 +358,6 @@ class CryptoinfoSensor(CoordinatorEntity):
 
     async def async_will_remove_from_hass(self) -> None:
         """Handle removal from Home Assistant."""
-        await self.coordinator.async_will_remove_from_hass()  # type: ignore
+        if isinstance(self.coordinator, CryptoDataCoordinator):
+            await self.coordinator.async_will_remove_from_hass()
         await super().async_will_remove_from_hass()
