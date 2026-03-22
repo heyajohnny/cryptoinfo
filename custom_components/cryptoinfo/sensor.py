@@ -44,6 +44,7 @@ from .const.const import (
     ATTR_LAST_UPDATE,
     ATTR_MARKET_CAP,
     ATTR_MULTIPLIER,
+    ATTR_PRECISION,
     ATTR_RANK,
     ATTR_TOTAL_SUPPLY,
     CONF_CRYPTOCURRENCY_IDS,
@@ -116,6 +117,7 @@ async def async_setup_entry(
                     unit_of_measurement,
                     multipliers_list[i],
                     id_name,
+                    precision,
                 )
             )
         except urllib.error.HTTPError as error:
@@ -275,12 +277,14 @@ class CryptoinfoSensor(CoordinatorEntity[CryptoDataCoordinator], SensorEntity):
         unit_of_measurement: str,
         multiplier: str,
         id_name: str,
+        precision: str,
     ):
         """Initialize the sensor."""
         super().__init__(coordinator)
         self.cryptocurrency_id = cryptocurrency_id
         self.currency_name = currency_name
         self.multiplier = multiplier
+        self._api_precision = precision
         # MONETARY + MEASUREMENT is invalid in Home Assistant; spot price is a measurement.
         self._attr_state_class = SensorStateClass.MEASUREMENT
         self._attr_native_unit_of_measurement = unit_of_measurement or None
@@ -320,6 +324,7 @@ class CryptoinfoSensor(CoordinatorEntity[CryptoDataCoordinator], SensorEntity):
                 ATTR_CURRENCY_NAME: None,
                 ATTR_BASE_PRICE: None,
                 ATTR_MULTIPLIER: None,
+                ATTR_PRECISION: self._api_precision or None,
                 ATTR_24H_VOLUME: None,
                 ATTR_1H_CHANGE: None,
                 ATTR_24H_CHANGE: None,
@@ -346,6 +351,7 @@ class CryptoinfoSensor(CoordinatorEntity[CryptoDataCoordinator], SensorEntity):
             ATTR_CURRENCY_NAME: self.currency_name,
             ATTR_BASE_PRICE: data["current_price"],
             ATTR_MULTIPLIER: self.multiplier,
+            ATTR_PRECISION: self._api_precision or None,
             ATTR_24H_VOLUME: data["total_volume"],
             ATTR_1H_CHANGE: data["price_change_percentage_1h_in_currency"],
             ATTR_24H_CHANGE: data["price_change_percentage_24h_in_currency"],

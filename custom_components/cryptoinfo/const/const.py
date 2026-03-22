@@ -34,6 +34,7 @@ ATTR_ATH_DATE = "ath_date"
 ATTR_ATH_CHANGE = "ath_change"
 ATTR_RANK = "rank"
 ATTR_IMAGE = "image"
+ATTR_PRECISION = "precision"
 
 API_ENDPOINT = "https://api.coingecko.com/api/v3/"
 

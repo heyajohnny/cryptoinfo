@@ -47,6 +47,7 @@ The next step is to add cryptoinfo sensors to your Home Assistant:
 - Multipliers                               The number of coins/tokens (seperated by a , character). The number of Multipliers must match the number of Cryptocurrency id's
 - Currency name                             One of the currency names that you can find on this <a href='https://api.coingecko.com/api/v3/simple/supported_vs_currencies' target='_blank'>page</a>
 - Unit of measurement                       You can use a currency symbol or you can make it empty. You can find some symbols on this <a href='https://en.wikipedia.org/wiki/Currency_symbol#List_of_currency_symbols_currently_in_use' target='_blank'>page</a>
+- Price precision (optional)                CoinGecko <code>precision</code> for prices in the API: leave empty for the API default, or set <code>full</code> for full precision, or <code>0</code>–<code>18</code> for decimal places. See <a href='https://docs.coingecko.com/reference/coins-markets' target='_blank'>coins/markets</a>.
 - Update frequency (minutes)                How often should the value be refreshed? Beware of the <a href='https://support.coingecko.com/hc/en-us/articles/4538771776153-What-is-the-rate-limit-for-CoinGecko-API-public-plan' target='_blank'>CoinGecko rate limit</a> when using multiple sensors
 - Minimum time between requests (minutes)   The minimum time between the other sensors and this sensor to make a data request to the API. (This property is shared and the same for every sensor). You can set this value to 0 if you only use 1 sensor
 </pre>
@@ -61,6 +62,7 @@ The entities have some important attributes:
 - currency_name         This will return the currency name
 - base_price            This will return the price of 1 coin / token in 'currency_name'(default = "usd") of the 'cryptocurrency_id'
 - multiplier            This will return the number of coins / tokens
+- precision             This will return the price precision used for this entry: <code>full</code>, <code>0</code>–<code>18</code>, or <code>null</code> if you left the option empty (API default)
 - 24h_volume            This will return the 24 hour volume in 'currency_name'(default = "usd") of the 'cryptocurrency_id'(default = "bitcoin")
 - 1h_change             This will return the 1 hour change in percentage of the 'cryptocurrency_id'(default = "bitcoin")
 - 24h_change            This will return the 24 hour change in percentage of the 'cryptocurrency_id'(default = "bitcoin")
