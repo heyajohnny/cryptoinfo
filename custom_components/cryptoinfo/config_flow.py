@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-"""
-Config flow component for Cryptoinfo
+"""Config flow for Cryptoinfo.
+
 Author: Johnny Visser
 """
 
@@ -8,11 +8,11 @@ from collections.abc import Mapping
 from typing import Any
 
 import voluptuous as vol
+
 from homeassistant import config_entries
 from homeassistant.helpers import config_validation as cv
 
-from .helper.crypto_info_data import CryptoInfoData
-
+from .config_validation import precision as cv_precision
 from .const.const import (
     _LOGGER,
     CONF_CRYPTOCURRENCY_IDS,
@@ -20,13 +20,17 @@ from .const.const import (
     CONF_ID,
     CONF_MIN_TIME_BETWEEN_REQUESTS,
     CONF_MULTIPLIERS,
+    CONF_PRECISION,
     CONF_UNIT_OF_MEASUREMENT,
     CONF_UPDATE_FREQUENCY,
     DOMAIN,
 )
+from .helper.crypto_info_data import CryptoInfoData
 
 
 class CryptoInfoConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
+    """Config flow to add or reconfigure Cryptoinfo entries."""
+
     VERSION = 1
 
     def _validate_input(self, user_input: dict[str, Any]) -> dict[str, Any]:
@@ -51,7 +55,17 @@ class CryptoInfoConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         return errors
 
+    def _precision_field_errors(self, user_input: dict[str, Any]) -> dict[str, str]:
+        """Validate CONF_PRECISION (UI schema must stay JSON-serializable)."""
+        errors: dict[str, str] = {}
+        try:
+            user_input[CONF_PRECISION] = cv_precision(user_input.get(CONF_PRECISION, ""))
+        except vol.Invalid:
+            errors[CONF_PRECISION] = "invalid_precision"
+        return errors
+
     async def async_step_reconfigure(self, user_input: Mapping[str, Any] | None = None):
+        """Allow changing an existing Cryptoinfo config entry."""
         entry = self.hass.config_entries.async_get_entry(self.context["entry_id"])
         assert entry
         if user_input:
@@ -63,6 +77,12 @@ class CryptoInfoConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 user_input[CONF_ID] = ""
             if CONF_UNIT_OF_MEASUREMENT not in user_input:
                 user_input[CONF_UNIT_OF_MEASUREMENT] = ""
+            if CONF_PRECISION not in user_input:
+                user_input[CONF_PRECISION] = ""
+
+            prec_errors = self._precision_field_errors(user_input)
+            if prec_errors:
+                return await self._redo_configuration(entry.data, prec_errors)
 
             # Validate the input
             validation_result = self._validate_input(user_input)
@@ -132,6 +152,11 @@ class CryptoInfoConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                         "suggested_value": entry_data.get(CONF_UNIT_OF_MEASUREMENT, "")
                     },
                 ): str,
+                vol.Optional(
+                    CONF_PRECISION,
+                    default=entry_data.get(CONF_PRECISION, ""),
+                    description={"suggested_value": entry_data.get(CONF_PRECISION, "")},
+                ): str,
                 vol.Required(
                     CONF_UPDATE_FREQUENCY, default=entry_data[CONF_UPDATE_FREQUENCY]
                 ): cv.positive_float,
@@ -171,6 +196,7 @@ class CryptoInfoConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             CONF_UNIT_OF_MEASUREMENT: "$",
             CONF_UPDATE_FREQUENCY: 1,
             CONF_MIN_TIME_BETWEEN_REQUESTS: default_min_time,
+            CONF_PRECISION: "",
         }
 
         # Update defaults with user input if it exists
@@ -197,6 +223,11 @@ class CryptoInfoConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                         "suggested_value": defaults.get(CONF_UNIT_OF_MEASUREMENT, "")
                     },
                 ): str,
+                vol.Optional(
+                    CONF_PRECISION,
+                    default="",
+                    description={"suggested_value": defaults.get(CONF_PRECISION, "")},
+                ): str,
                 vol.Required(
                     CONF_UPDATE_FREQUENCY, default=defaults[CONF_UPDATE_FREQUENCY]
                 ): cv.positive_float,
@@ -213,6 +244,15 @@ class CryptoInfoConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             )
 
         try:
+            prec_errors = self._precision_field_errors(user_input)
+            if prec_errors:
+                errors.update(prec_errors)
+                return self.async_show_form(
+                    step_id="user",
+                    data_schema=cryptoinfo_schema,
+                    errors=errors,
+                )
+
             # Validate the input
             validation_result = self._validate_input(user_input)
             if validation_result:
@@ -237,7 +277,7 @@ class CryptoInfoConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 title=f"Cryptoinfo for {user_input[CONF_ID]}", data=user_input
             )
 
-        except Exception as ex:
+        except Exception as ex:  # noqa: BLE001
             _LOGGER.error(f"Error creating entry: {ex}")
             errors["base"] = f"Error creating entry: {ex}"
             return self.async_show_form(

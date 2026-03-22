@@ -6,12 +6,13 @@ Author: Johnny Visser
 
 from datetime import datetime, timedelta
 import urllib.error
+from urllib.parse import urlencode
 
 from aiohttp import ClientError
 
 from homeassistant import config_entries
 from homeassistant.components.sensor import SensorEntity
-from homeassistant.components.sensor.const import SensorDeviceClass, SensorStateClass
+from homeassistant.components.sensor.const import SensorStateClass
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import aiohttp_client
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -50,6 +51,7 @@ from .const.const import (
     CONF_ID,
     CONF_MIN_TIME_BETWEEN_REQUESTS,
     CONF_MULTIPLIERS,
+    CONF_PRECISION,
     CONF_UNIT_OF_MEASUREMENT,
     CONF_UPDATE_FREQUENCY,
     SENSOR_PREFIX,
@@ -75,6 +77,7 @@ async def async_setup_entry(
     min_time_between_requests = timedelta(
         minutes=(float(config.get(CONF_MIN_TIME_BETWEEN_REQUESTS)))
     )
+    precision = (config.get(CONF_PRECISION) or "").strip().lower()
 
     # Create coordinator for centralized data fetching
     coordinator = CryptoDataCoordinator(
@@ -84,6 +87,7 @@ async def async_setup_entry(
         update_frequency,
         min_time_between_requests,
         id_name,
+        precision,
     )
 
     # Wait for coordinator to do first update
@@ -138,6 +142,7 @@ class CryptoDataCoordinator(DataUpdateCoordinator):
         update_frequency: timedelta,
         min_time_between_requests: timedelta,
         id_name: str,
+        precision: str,
     ):
         """Initialize the coordinator."""
         super().__init__(
@@ -156,6 +161,18 @@ class CryptoDataCoordinator(DataUpdateCoordinator):
         self.id_name = id_name
         self.min_time_between_requests = min_time_between_requests
         self.update_frequency = update_frequency
+        self.precision = precision
+
+    def _markets_url(self) -> str:
+        """Build the CoinGecko /coins/markets request URL."""
+        params = [
+            ("vs_currency", self.currency_name),
+            ("ids", self.cryptocurrency_ids),
+            ("price_change_percentage", "1h,24h,7d,14d,30d,1y"),
+        ]
+        if self.precision:
+            params.append(("precision", self.precision))
+        return f"{API_ENDPOINT}coins/markets?{urlencode(params)}"
 
     async def async_will_remove_from_hass(self) -> None:
         """Handle removal from Home Assistant."""
@@ -178,12 +195,7 @@ class CryptoDataCoordinator(DataUpdateCoordinator):
                 f"First request, fetching data for sensor: {self.id_name} instance_id: {self.instance_id} cryptocurrency_ids: {self.cryptocurrency_ids}"
             )
 
-            url = (
-                f"{API_ENDPOINT}coins/markets"
-                f"?ids={self.cryptocurrency_ids}"
-                f"&vs_currency={self.currency_name}"
-                f"&price_change_percentage=1h%2C24h%2C7d%2C14d%2C30d%2C1y"
-            )
+            url = self._markets_url()
 
             try:
                 session = aiohttp_client.async_get_clientsession(self.hass)
@@ -234,12 +246,7 @@ class CryptoDataCoordinator(DataUpdateCoordinator):
             f"Fetch data from API endpoint, sensor: {self.id_name} instance_id: {self.instance_id} cryptocurrency_ids: {self.cryptocurrency_ids}"
         )
 
-        url = (
-            f"{API_ENDPOINT}coins/markets"
-            f"?ids={self.cryptocurrency_ids}"
-            f"&vs_currency={self.currency_name}"
-            f"&price_change_percentage=1h%2C24h%2C7d%2C14d%2C30d%2C1y"
-        )
+        url = self._markets_url()
 
         try:
             session = aiohttp_client.async_get_clientsession(self.hass)
@@ -274,7 +281,7 @@ class CryptoinfoSensor(CoordinatorEntity[CryptoDataCoordinator], SensorEntity):
         self.cryptocurrency_id = cryptocurrency_id
         self.currency_name = currency_name
         self.multiplier = multiplier
-        self._attr_device_class = SensorDeviceClass.MONETARY
+        # MONETARY + MEASUREMENT is invalid in Home Assistant; spot price is a measurement.
         self._attr_state_class = SensorStateClass.MEASUREMENT
         self._attr_native_unit_of_measurement = unit_of_measurement or None
         # Let Home Assistant generate a valid entity ID (CoinGecko ids can contain '-')

@@ -9,6 +9,7 @@ CONF_MULTIPLIERS = "multipliers"
 CONF_UPDATE_FREQUENCY = "update_frequency"
 CONF_UNIT_OF_MEASUREMENT = "unit_of_measurement"
 CONF_MIN_TIME_BETWEEN_REQUESTS = "min_time_between_requests"
+CONF_PRECISION = "precision"
 
 SENSOR_PREFIX = "Cryptoinfo "
 ATTR_LAST_UPDATE = "last_update"
