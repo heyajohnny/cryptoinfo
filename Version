@@ -26,3 +26,4 @@ Version: 1.0.6 20241222 - Added 14 day change and 1 year change
 Version: 1.0.7 20241227 - Added ath_price, ath_date and ath_change
 Version: 1.0.8 20260317 - Updated code to support future Home Assistant versions
 Version: 1.0.9 20260322 - Optional CoinGecko API price precision (config + /coins/markets)
+Version: 1.0.10 20260323 - Fix default and 0 precision values

@@ -306,9 +306,15 @@ class CryptoinfoSensor(CoordinatorEntity[CryptoDataCoordinator], SensorEntity):
     def native_value(self):
         """Return the native value of the sensor."""
         if self.coordinator.data and self.cryptocurrency_id in self.coordinator.data:
-            return float(
+            value = float(
                 self.coordinator.data[self.cryptocurrency_id]["current_price"]
             ) * float(self.multiplier)
+            # Keep integer display when there are no decimals (or precision=0).
+            if self._api_precision == "0":
+                return int(round(value))
+            if self._api_precision == "" and value.is_integer():
+                return int(value)
+            return value
         return None
 
     @property
